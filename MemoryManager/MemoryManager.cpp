@@ -14,13 +14,16 @@ MemoryManager::~MemoryManager()
 
 }
 
-void MemoryManager::addPool(size_t sizeBytes)
+PoolAllocator* MemoryManager::addPool(size_t sizeBytes)
 {
-	m_pools.insert(new PoolAllocator(getMem(sizeBytes), sizeBytes));
+	PoolAllocator* temp = new PoolAllocator(getMem(sizeBytes), sizeBytes);
+	m_pools.insert(temp);
+	return m_pools.back();
 }
 
-void MemoryManager::addStack(size_t sizeBytes)
+StackAllocator* MemoryManager::addStack(size_t sizeBytes)
 {
 	m_stacks.insert(new StackAllocator(getMem(sizeBytes), sizeBytes));
+	return m_stacks.back();
 }
 

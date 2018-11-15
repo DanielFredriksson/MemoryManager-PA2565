@@ -10,9 +10,8 @@ size_t PoolAllocator::space(Entry first, Entry second)
 	return size_t();
 }
 
-PoolAllocator::PoolAllocator()
+PoolAllocator::PoolAllocator(void * memPtr, size_t sizeBytes)
 {
-
 }
 
 PoolAllocator::~PoolAllocator()

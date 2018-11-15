@@ -21,8 +21,8 @@ public:
 	};
 
 public:
-	PoolAllocator();
-	~PoolAllocator();
+	PoolAllocator(void* memPtr, size_t sizeBytes);
+	virtual ~PoolAllocator();
 
 	virtual void* allocate(size_t sizeBytes);
 	virtual void deallocateAll();

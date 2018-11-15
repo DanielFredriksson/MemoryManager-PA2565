@@ -19,6 +19,6 @@ public:
 	MemoryManager();
 	~MemoryManager();
 
-	void addPool(size_t sizeBytes);
-	void addStack(size_t sizeBytes);
+	PoolAllocator* addPool(size_t sizeBytes);
+	StackAllocator* addStack(size_t sizeBytes);
 };

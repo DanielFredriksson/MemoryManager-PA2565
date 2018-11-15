@@ -9,6 +9,14 @@ void StackAllocator::clearToMarker(Marker marker)
 {
 }
 
+StackAllocator::StackAllocator(void * memPtr, size_t sizeBytes)
+{
+}
+
+StackAllocator::~StackAllocator()
+{
+}
+
 void * StackAllocator::allocate(size_t sizeBytes)
 {
 	return nullptr;
