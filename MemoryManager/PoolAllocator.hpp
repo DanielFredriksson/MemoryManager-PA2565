@@ -1,9 +1,10 @@
 #pragma once
 
 #include <vector>
+#include "Allocator.h"
 
 typedef unsigned int ID;
-class PoolAllocator 
+class PoolAllocator: private Allocator 
 {
 	struct Entry;
 private:
