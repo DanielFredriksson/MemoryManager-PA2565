@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Allocator.h"
-
+#include <atomic>
 typedef unsigned int Marker;
 class StackAllocator : private Allocator 
 {
 private:
-	Marker m_marker;
+	std::atomic<Marker> m_marker;
 
 public:
 	StackAllocator(void* memPtr, size_t sizeBytes);
