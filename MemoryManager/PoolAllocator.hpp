@@ -28,7 +28,7 @@ public:
 
 	bool removeEntry(const ID id);
 
-	void printEntires() {
+	void printEntries() {
 		for (unsigned int i = 0; i < m_numEntries; i++)
 			std::cout << m_entries[i]->val << std::endl;
 	}

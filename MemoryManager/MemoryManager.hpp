@@ -30,10 +30,10 @@ public:
 		return instance;
 	}
 
-	void cleanUp();
-};
 	PoolAllocator* addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries);
 	StackAllocator* addStack(unsigned int sizeBytes);
+
+	void cleanUp();
 };
 
 #endif

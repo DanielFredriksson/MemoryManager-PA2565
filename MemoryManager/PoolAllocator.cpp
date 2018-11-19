@@ -54,6 +54,8 @@ void * PoolAllocator::allocate()
 
 void PoolAllocator::deallocateAll()
 {
+	for (auto& i : this->m_entries)
+		i->used = false;
 }
 
 bool PoolAllocator::removeEntry(const ID id)
