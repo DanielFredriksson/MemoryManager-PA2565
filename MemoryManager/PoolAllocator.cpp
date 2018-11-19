@@ -1,5 +1,8 @@
 #include "PoolAllocator.hpp"
 
+/*
+	Private Functions
+*/
 unsigned int PoolAllocator::findFreeEntry()
 {
 	for (unsigned int i = 0; i < m_entries.size(); i++) {
@@ -12,10 +15,9 @@ unsigned int PoolAllocator::findFreeEntry()
 	return -1;
 }
 
-size_t PoolAllocator::space(Entry first, Entry second)
-{
-	return size_t();
-}
+/*
+	Public Functions
+*/
 
 PoolAllocator::PoolAllocator(void* memPtr, unsigned int sizeBytesEachEntry, unsigned int numEntries) 
 	: Allocator(memPtr, sizeBytesEachEntry * numEntries)
@@ -23,7 +25,7 @@ PoolAllocator::PoolAllocator(void* memPtr, unsigned int sizeBytesEachEntry, unsi
 	m_sizeEachEntry = sizeBytesEachEntry;
 	m_numEntries = numEntries;
 
-	for (int i = 0; i < numEntries; i++)
+	for (unsigned int i = 0; i < numEntries; i++)
 		m_entries.emplace_back(std::unique_ptr<Entry>(new Entry()));
 }
 

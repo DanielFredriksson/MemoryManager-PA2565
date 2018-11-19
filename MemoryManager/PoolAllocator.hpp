@@ -29,14 +29,13 @@ public:
 	bool removeEntry(const ID id);
 
 	void printEntires() {
-		for (int i = 0; i < m_numEntries; i++)
+		for (unsigned int i = 0; i < m_numEntries; i++)
 			std::cout << m_entries[i]->val << std::endl;
 	}
 
 
 private:
 	unsigned int findFreeEntry();
-	size_t space(Entry first, Entry second);
 
 
 private:

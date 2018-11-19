@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MEMORY_MANAGER
+#define MEMORY_MANAGER
 
 #include <vector>
 
@@ -29,6 +30,8 @@ public:
 		return instance;
 	}
 
-	PoolAllocator* addPool(size_t sizeBytesEachEntry, unsigned int numEntries);
-	StackAllocator* addStack(size_t sizeBytes);
+	PoolAllocator* addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries);
+	StackAllocator* addStack(unsigned int sizeBytes);
 };
+
+#endif
