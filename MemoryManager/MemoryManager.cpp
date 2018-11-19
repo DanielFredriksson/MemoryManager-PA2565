@@ -2,7 +2,7 @@
 
 void * MemoryManager::getMem(size_t sizeBytes)
 {
-	return malloc(sizeBytes);
+	return calloc(1, sizeBytes);
 }
 
 MemoryManager::MemoryManager()
