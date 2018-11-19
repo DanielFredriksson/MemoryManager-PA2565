@@ -17,7 +17,7 @@ size_t PoolAllocator::space(Entry first, Entry second)
 	return size_t();
 }
 
-PoolAllocator::PoolAllocator(void* memPtr, size_t sizeBytesEachEntry, unsigned int numEntries) 
+PoolAllocator::PoolAllocator(void* memPtr, unsigned int sizeBytesEachEntry, unsigned int numEntries) 
 	: Allocator(memPtr, sizeBytesEachEntry * numEntries)
 {
 	m_sizeEachEntry = sizeBytesEachEntry;
@@ -46,7 +46,7 @@ void * PoolAllocator::allocate()
 		m_entries[index]->val = std::this_thread::get_id();
 
 		// Return memory adress for the entry (memory_bottom_pointer + entry * size_of_entry)
-		return 0;
+		return static_cast<char*>(m_memPtr) + index * m_sizeEachEntry;
 	}
 }
 

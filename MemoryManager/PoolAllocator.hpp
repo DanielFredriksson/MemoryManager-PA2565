@@ -19,7 +19,7 @@ public:
 	};
 
 public:
-	PoolAllocator(void* memPtr, size_t sizeBytesEachEntry, unsigned int numEntries);
+	PoolAllocator(void* memPtr, unsigned int sizeBytesEachEntry, unsigned int numEntries);
 	virtual ~PoolAllocator();
 
 	void* allocate();
