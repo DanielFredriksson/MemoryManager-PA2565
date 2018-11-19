@@ -31,4 +31,6 @@ public:
 
 	PoolAllocator* addPool(size_t sizeBytesEachEntry, unsigned int numEntries);
 	StackAllocator* addStack(size_t sizeBytes);
+
+	void cleanUp();
 };

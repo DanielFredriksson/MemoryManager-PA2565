@@ -5,7 +5,7 @@ unsigned int PoolAllocator::findFreeEntry()
 	for (unsigned int i = 0; i < m_entries.size(); i++) {
 		bool expected = false;
 		// Atomic compare and exchange, returns true if 'used == expected', else puts whatever 
-		//  'used' was into 'expected' and tries again
+		// 'used' was into 'expected' and tries again
 		if (m_entries[i]->used.compare_exchange_strong(expected, true))
 			return i;
 	}
