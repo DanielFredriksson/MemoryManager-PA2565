@@ -3,6 +3,7 @@
 #include <deque>
 #include <shared_mutex>
 #include <atomic>
+#include <iostream>
 
 #include "Allocator.h"
 
@@ -21,10 +22,16 @@ public:
 	PoolAllocator(void* memPtr, size_t sizeBytesEachEntry, unsigned int numEntries);
 	virtual ~PoolAllocator();
 
-	virtual void* allocate(size_t sizeBytes);
+	void* allocate();
+	
 	virtual void deallocateAll();
 
 	bool removeEntry(const ID id);
+
+	void printEntires() {
+		for (int i = 0; i < m_numEntries; i++)
+			std::cout << m_entries[i]->val << std::endl;
+	}
 
 
 private:

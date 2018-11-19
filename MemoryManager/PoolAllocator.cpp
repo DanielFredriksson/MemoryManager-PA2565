@@ -4,8 +4,8 @@ unsigned int PoolAllocator::findFreeEntry()
 {
 	for (unsigned int i = 0; i < m_entries.size(); i++) {
 		bool expected = false;
-		// Atomic compare and exchange, returns true if 'used == expected', else puts whatever 'used' was 
-		//	into 'expected' and tries again
+		// Atomic compare and exchange, returns true if 'used == expected', else puts whatever 
+		//  'used' was into 'expected' and tries again
 		if (m_entries[i]->used.compare_exchange_strong(expected, true))
 			return i;
 	}
@@ -22,6 +22,9 @@ PoolAllocator::PoolAllocator(void* memPtr, size_t sizeBytesEachEntry, unsigned i
 {
 	m_sizeEachEntry = sizeBytesEachEntry;
 	m_numEntries = numEntries;
+
+	for (int i = 0; i < numEntries; i++)
+		m_entries.emplace_back(std::unique_ptr<Entry>(new Entry()));
 }
 
 PoolAllocator::~PoolAllocator()
@@ -29,7 +32,7 @@ PoolAllocator::~PoolAllocator()
 
 }
 
-void * PoolAllocator::allocate(size_t sizeBytes)
+void * PoolAllocator::allocate()
 {
 	unsigned int index = PoolAllocator::findFreeEntry();
 	if (index == -1) {
