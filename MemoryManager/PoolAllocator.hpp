@@ -8,17 +8,7 @@
 
 typedef unsigned int ID;
 class PoolAllocator: private Allocator 
-{
-	struct Entry;
-private:
-	// Vector can't be used in conjuction with objects that can't be moved/copied
-	// https://stackoverflow.com/questions/37870731/resize-a-stdvectorstdatomic-bool-assigning-true-to-all-atomic-bools
-	std::deque<std::unique_ptr<Entry>> entries;
-
-private:
-	unsigned int findFreeEntry();
-	size_t space(Entry first, Entry second);
-	
+{	
 public:
 	struct Entry {
 		std::shared_mutex mu; // Used to make sure that the resource isn't read while it's being modified
@@ -34,5 +24,14 @@ public:
 	virtual void deallocateAll();
 
 	bool removeEntry(const ID id);
+
+private:
+	// Vector can't be used in conjuction with objects that can't be moved/copied
+	// https://stackoverflow.com/questions/37870731/resize-a-stdvectorstdatomic-bool-assigning-true-to-all-atomic-bools
+	std::deque<std::unique_ptr<Entry>> entries;
+
+private:
+	unsigned int findFreeEntry();
+	size_t space(Entry first, Entry second);
 
 };
