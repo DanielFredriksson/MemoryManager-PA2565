@@ -15,9 +15,19 @@ private:
 	// GET DA MEMorIH
 	void* getMem(size_t sizeBytes);
 
+	// Singleton class shouldn't be able to be copied
+	MemoryManager(MemoryManager const&) = delete;
+	void operator=(MemoryManager const&) = delete;
+
 public:
 	MemoryManager();
 	~MemoryManager();
+
+	static MemoryManager& getInstance() {
+		static MemoryManager instance;
+
+		return instance;
+	}
 
 	PoolAllocator* addPool(size_t sizeBytes);
 	StackAllocator* addStack(size_t sizeBytes);
