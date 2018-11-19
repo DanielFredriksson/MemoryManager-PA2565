@@ -29,6 +29,6 @@ public:
 		return instance;
 	}
 
-	PoolAllocator* addPool(size_t sizeBytes);
+	PoolAllocator* addPool(size_t sizeBytesEachEntry, unsigned int numEntries);
 	StackAllocator* addStack(size_t sizeBytes);
 };

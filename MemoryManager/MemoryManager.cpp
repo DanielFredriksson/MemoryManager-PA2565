@@ -14,9 +14,9 @@ MemoryManager::~MemoryManager()
 
 }
 
-PoolAllocator* MemoryManager::addPool(size_t sizeBytes)
+PoolAllocator* MemoryManager::addPool(size_t sizeBytesEachEntry, unsigned int numEntries)
 {
-	PoolAllocator* temp = new PoolAllocator(getMem(sizeBytes), sizeBytes);
+	PoolAllocator* temp = new PoolAllocator(getMem(sizeBytesEachEntry * numEntries), sizeBytesEachEntry, numEntries);
 	m_pools.push_back(temp);
 	return m_pools.back();
 }
