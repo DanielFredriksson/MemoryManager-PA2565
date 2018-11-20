@@ -33,6 +33,7 @@ public:
 			std::cout << m_entries[i]->val << std::endl;
 	}
 
+	void cleanUp();
 
 private:
 	unsigned int findFreeEntry();

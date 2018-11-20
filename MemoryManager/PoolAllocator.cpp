@@ -31,7 +31,7 @@ PoolAllocator::PoolAllocator(void* memPtr, unsigned int sizeBytesEachEntry, unsi
 
 PoolAllocator::~PoolAllocator()
 {
-
+	this->cleanUp();
 }
 
 void * PoolAllocator::allocate()
@@ -61,4 +61,13 @@ void PoolAllocator::deallocateAll()
 bool PoolAllocator::removeEntry(const ID id)
 {
 	return false;
+}
+
+void PoolAllocator::cleanUp()
+{
+	if (this->m_memPtr != nullptr)
+	{
+		free(this->m_memPtr);
+		this->m_memPtr = nullptr;
+	}
 }
