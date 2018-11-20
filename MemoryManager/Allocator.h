@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ALLOCATOR
+#define ALLOCATOR
 class Allocator 
 {
 
@@ -13,4 +14,6 @@ public:
 	virtual void deallocateAll() = 0;
 
 };
+
+#endif //ALLOCATOR
 

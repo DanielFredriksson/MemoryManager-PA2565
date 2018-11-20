@@ -24,7 +24,8 @@ public:
 	MemoryManager();
 	~MemoryManager();
 
-	static MemoryManager& getInstance() {
+	static MemoryManager& getInstance() 
+	{
 		static MemoryManager instance;
 
 		return instance;
