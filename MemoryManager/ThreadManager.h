@@ -17,13 +17,12 @@ private:
 	std::condition_variable m_cond;
 
 	bool initialized = false;
+	bool m_shutdown = false;
 
 	std::queue<std::function<void(void)>> m_jobs;
 
 	std::mutex m_mutex;
 
-	bool m_shutdown;
-	
 private:
 	void threadEntry(unsigned int threadID);
 
