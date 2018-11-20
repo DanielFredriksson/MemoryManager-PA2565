@@ -17,4 +17,6 @@ public:
 
 	Marker getMarker();
 	void clearToMarker(Marker marker);
+
+	void cleanUp();
 };

@@ -8,7 +8,7 @@ unsigned int PoolAllocator::findFreeEntry()
 	for (unsigned int i = 0; i < m_entries.size(); i++) {
 		bool expected = false;
 		// Atomic compare and exchange, returns true if 'used == expected', else puts whatever 
-		//  'used' was into 'expected' and tries again
+		// 'used' was into 'expected' and tries again
 		if (m_entries[i]->used.compare_exchange_strong(expected, true))
 			return i;
 	}
@@ -31,7 +31,7 @@ PoolAllocator::PoolAllocator(void* memPtr, unsigned int sizeBytesEachEntry, unsi
 
 PoolAllocator::~PoolAllocator()
 {
-
+	this->cleanUp();
 }
 
 void * PoolAllocator::allocate()
@@ -54,9 +54,20 @@ void * PoolAllocator::allocate()
 
 void PoolAllocator::deallocateAll()
 {
+	for (auto& i : this->m_entries)
+		i->used = false;
 }
 
 bool PoolAllocator::removeEntry(const ID id)
 {
 	return false;
+}
+
+void PoolAllocator::cleanUp()
+{
+	if (this->m_memPtr != nullptr)
+	{
+		free(this->m_memPtr);
+		this->m_memPtr = nullptr;
+	}
 }
