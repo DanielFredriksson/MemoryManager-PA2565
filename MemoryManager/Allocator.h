@@ -2,7 +2,7 @@
 class Allocator 
 {
 
-private:
+protected:
 	void* m_memPtr;
 	size_t m_sizeBytes;
 
