@@ -69,6 +69,14 @@ bool PoolAllocator::removeEntry(const ID id)
 	return false;
 }
 
+std::vector<bool> PoolAllocator::getUsedMemory()
+{
+	std::vector<bool> usedMemory;
+	for (int i = 0; i < m_entries.size(); i++)
+		usedMemory.push_back(m_entries[i]);
+	return usedMemory;
+}
+
 /*void PoolAllocator::cleanUp()
 {
 	if (this->m_memPtr != nullptr)

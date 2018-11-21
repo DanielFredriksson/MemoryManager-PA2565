@@ -11,6 +11,15 @@ void StackAllocator::clearToMarker(Marker marker)
 	m_marker.store(marker);
 }
 
+std::vector<bool> StackAllocator::getUsedMemory()
+{
+	std::vector<bool> usedMemory;
+	unsigned int percentUsed = int(float(m_marker) / float(m_sizeBytes) * 100.f);
+	for (unsigned int i = 0; i < 100; i++)
+		usedMemory.push_back((i > percentUsed) ? false : true);
+	return usedMemory;
+}
+
 StackAllocator::StackAllocator(void * memPtr, unsigned int sizeBytes): Allocator(memPtr, padMemory(sizeBytes))
 {
 	m_marker.store(0);

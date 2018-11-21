@@ -1,6 +1,8 @@
 #ifndef ALLOCATOR
 #define ALLOCATOR
 
+#include <vector>
+
 class Allocator 
 {
 
@@ -14,6 +16,9 @@ public:
 	virtual ~Allocator();
 
 	virtual void deallocateAll() = 0;
+
+	// Memory tracking for debugging purposes
+	virtual std::vector<bool> getUsedMemory() = 0;
 
 };
 

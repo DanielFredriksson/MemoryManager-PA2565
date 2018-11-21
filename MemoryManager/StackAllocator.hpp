@@ -30,6 +30,9 @@ public:
 	Marker getMarker();
 	void clearToMarker(Marker marker);
 
+	// Memory tracking for debugging purposes
+	virtual std::vector<bool> getUsedMemory();
+
 
 };
 

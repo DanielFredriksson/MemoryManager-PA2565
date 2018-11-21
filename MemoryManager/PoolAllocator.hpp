@@ -43,9 +43,12 @@ public:
 	bool removeEntry(const ID id);
 
 	void printEntries() {
-		for (unsigned int i = 0; i < m_numEntries; i++);
+		//for (unsigned int i = 0; i < m_numEntries; i++);
 			//std::cout << m_entries[i]->val << std::endl;
 	}
+
+	// Memory tracking for debugging purposes
+	virtual std::vector<bool> getUsedMemory();
 
 };
 
