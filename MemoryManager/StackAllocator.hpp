@@ -17,6 +17,9 @@ private:
 private:
 	void cleanUp();
 
+	unsigned int padMemory(unsigned int sizeBytes);
+
+
 public:
 	StackAllocator(void* memPtr, unsigned int sizeBytes);
 	virtual ~StackAllocator();

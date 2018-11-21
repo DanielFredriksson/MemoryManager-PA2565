@@ -14,7 +14,6 @@ public:
 	virtual ~Allocator();
 
 	virtual void deallocateAll() = 0;
-	unsigned int padMemory(unsigned int sizeBytes);
 
 };
 

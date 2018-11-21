@@ -11,7 +11,7 @@ void StackAllocator::clearToMarker(Marker marker)
 	m_marker.store(marker);
 }
 
-StackAllocator::StackAllocator(void * memPtr, unsigned int sizeBytes) : Allocator(memPtr, sizeBytes)
+StackAllocator::StackAllocator(void * memPtr, unsigned int sizeBytes): Allocator(memPtr, padMemory(sizeBytes))
 {
 	m_marker.store(0);
 }
@@ -56,4 +56,10 @@ void StackAllocator::cleanUp()
 		free(m_memPtr);
 		m_memPtr = nullptr;
 	}
+}
+
+unsigned int StackAllocator::padMemory(unsigned int sizeBytes) {
+	unsigned int paddedMemory = sizeBytes % 8;
+	paddedMemory = sizeBytes + (8 - paddedMemory);
+	return paddedMemory;
 }
