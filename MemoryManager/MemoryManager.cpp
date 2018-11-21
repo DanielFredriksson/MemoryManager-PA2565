@@ -33,15 +33,15 @@ void MemoryManager::cleanUp()
 
 	loopCount = this->m_pools.size();
 	for (int i = 0; i < loopCount; i++)
-		if (this->m_pools.at(loopCount) != nullptr)
-			delete this->m_pools.at(loopCount);
+		if (this->m_pools.at(i) != nullptr)
+			delete this->m_pools.at(i);
 	this->m_pools.clear();
 	this->m_pools.resize(0);
 
 	loopCount = this->m_stacks.size();
 	for (int i = 0; i < loopCount; i++)
-		if (this->m_stacks.at(loopCount) != nullptr)
-			delete this->m_stacks.at(loopCount);
+		if (this->m_stacks.at(i) != nullptr)
+			delete this->m_stacks.at(i);
 	this->m_stacks.clear();
 	this->m_stacks.resize(0);
 }
