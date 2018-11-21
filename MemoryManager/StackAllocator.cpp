@@ -16,7 +16,7 @@ StackAllocator::StackAllocator(void * memPtr, size_t sizeBytes) : Allocator(memP
 
 StackAllocator::~StackAllocator()
 {
-	this->cleanUp();
+	cleanUp();
 }
 
 void * StackAllocator::allocate(size_t sizeBytes)
@@ -32,9 +32,9 @@ void StackAllocator::deallocateAll()
 
 void StackAllocator::cleanUp()
 {
-	if (this->m_memPtr != nullptr)
+	if (m_memPtr != nullptr)
 	{
-		free(this->m_memPtr);
-		this->m_memPtr = nullptr;
+		free(m_memPtr);
+		m_memPtr = nullptr;
 	}
 }
