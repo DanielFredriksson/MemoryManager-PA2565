@@ -8,11 +8,13 @@ protected:
 	void* m_memPtr;
 	size_t m_sizeBytes;
 
+
 public:
-	Allocator(void* memPtr, size_t sizeBytes);
+	Allocator(void* memPtr, unsigned int sizeBytes);
 	virtual ~Allocator();
 
 	virtual void deallocateAll() = 0;
+	unsigned int padMemory(unsigned int sizeBytes);
 
 };
 

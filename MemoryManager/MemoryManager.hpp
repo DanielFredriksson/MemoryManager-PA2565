@@ -14,7 +14,7 @@ private:
 
 private:
 	// GET DA MEMorIH
-	void* getMem(size_t sizeBytes);
+	void* getMem(unsigned int sizeBytes);
 
 	// Singleton class shouldn't be able to be copied
 	MemoryManager(MemoryManager const&) = delete;

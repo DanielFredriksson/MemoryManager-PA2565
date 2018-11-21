@@ -1,6 +1,6 @@
 #include "MemoryManager.hpp"
 
-void* MemoryManager::getMem(size_t sizeBytes)
+void* MemoryManager::getMem(unsigned int sizeBytes)
 {
 	return calloc(1, sizeBytes);
 }
