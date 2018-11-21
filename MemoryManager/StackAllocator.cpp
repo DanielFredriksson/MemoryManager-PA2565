@@ -69,6 +69,9 @@ void StackAllocator::cleanUp()
 
 unsigned int StackAllocator::padMemory(unsigned int sizeBytes) {
 	unsigned int paddedMemory = sizeBytes % 8;
-	paddedMemory = sizeBytes + (8 - paddedMemory);
+	if (paddedMemory != 0)
+		paddedMemory = sizeBytes + (8 - paddedMemory);
+	else
+		paddedMemory = sizeBytes;
 	return paddedMemory;
 }
