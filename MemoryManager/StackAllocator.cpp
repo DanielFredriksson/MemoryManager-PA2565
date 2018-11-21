@@ -21,12 +21,12 @@ StackAllocator::~StackAllocator()
 	cleanUp();
 }
 
-void * StackAllocator::allocate(size_t sizeBytes)
+void * StackAllocator::allocate(size_t sizeBytes) 
 {
 	char* ptr = nullptr;
 
 	std::lock_guard<std::shared_mutex> lock(m_mtx);
-	try {
+	//try {
 		if (m_marker + sizeBytes <= m_sizeBytes) {
 			// Get current marker location and move marker to top.
 			Marker currMarker = m_marker.fetch_add(sizeBytes);
@@ -34,11 +34,11 @@ void * StackAllocator::allocate(size_t sizeBytes)
 			ptr = (char*)m_memPtr + currMarker;
 		}
 		else
-			throw 1;
-	}
-	catch (int e) {
-		std::cout << "StackAllocator::allocate : An EXCEPTION occured! Exception #" << e << '\n';
-	}
+			throw std::exception("StackAllocator::allocate : Tried to allocate more memory than was available.");
+	//}
+	//catch (int e) {
+	//	std::cout << "StackAllocator::allocate : An EXCEPTION occured! Exception #" << e << '\n';
+	//}
 	return ptr;
 }
 
