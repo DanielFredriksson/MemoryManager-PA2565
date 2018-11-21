@@ -11,7 +11,7 @@ void StackAllocator::clearToMarker(Marker marker)
 	m_marker.store(marker);
 }
 
-StackAllocator::StackAllocator(void * memPtr, size_t sizeBytes) : Allocator(memPtr, sizeBytes)
+StackAllocator::StackAllocator(void * memPtr, unsigned int sizeBytes): Allocator(memPtr, padMemory(sizeBytes))
 {
 	m_marker.store(0);
 }
@@ -21,15 +21,17 @@ StackAllocator::~StackAllocator()
 	cleanUp();
 }
 
-void * StackAllocator::allocate(size_t sizeBytes) 
+void* StackAllocator::allocate(unsigned int sizeBytes)
 {
 	char* ptr = nullptr;
+	unsigned int paddedMemory = padMemory(sizeBytes);
+	
 
 	std::lock_guard<std::shared_mutex> lock(m_mtx);
 	//try {
-		if (m_marker + sizeBytes <= m_sizeBytes) {
+		if (m_marker + paddedMemory <= m_sizeBytes) {
 			// Get current marker location and move marker to top.
-			Marker currMarker = m_marker.fetch_add(sizeBytes);
+			Marker currMarker = m_marker.fetch_add(paddedMemory);
 
 			ptr = (char*)m_memPtr + currMarker;
 		}
@@ -54,4 +56,10 @@ void StackAllocator::cleanUp()
 		free(m_memPtr);
 		m_memPtr = nullptr;
 	}
+}
+
+unsigned int StackAllocator::padMemory(unsigned int sizeBytes) {
+	unsigned int paddedMemory = sizeBytes % 8;
+	paddedMemory = sizeBytes + (8 - paddedMemory);
+	return paddedMemory;
 }

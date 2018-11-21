@@ -13,17 +13,24 @@ private:
 	std::atomic<Marker> m_marker;
 	std::shared_mutex m_mtx;
 
+
+private:
+	void cleanUp();
+
+	unsigned int padMemory(unsigned int sizeBytes);
+
+
 public:
-	StackAllocator(void* memPtr, size_t sizeBytes);
+	StackAllocator(void* memPtr, unsigned int sizeBytes);
 	virtual ~StackAllocator();
 
-	virtual void* allocate(size_t sizeBytes);
+	void* allocate(unsigned int sizeBytes);
 	virtual void deallocateAll();
 
 	Marker getMarker();
 	void clearToMarker(Marker marker);
 
-	void cleanUp();
+
 };
 
 #endif //STACK_ALLOCATOR
