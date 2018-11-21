@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Glut %28hpp%29">
+      <UniqueIdentifier>{b8470f67-b8d6-403a-873c-064ff17b8ccf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Glut %28cpp%29">
+      <UniqueIdentifier>{a5713366-d90c-426f-8538-16926a917b3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MemoryManager.hpp">
@@ -29,6 +35,15 @@
     </ClInclude>
     <ClInclude Include="ThreadManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GlutIncludes.hpp">
+      <Filter>Header Files\Glut %28hpp%29</Filter>
+    </ClInclude>
+    <ClInclude Include="GlutManager.hpp">
+      <Filter>Header Files\Glut %28hpp%29</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderFunctions.hpp">
+      <Filter>Header Files\Glut %28hpp%29</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +64,12 @@
     </ClCompile>
     <ClCompile Include="ThreadManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GlutManager.cpp">
+      <Filter>Source Files\Glut %28cpp%29</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderFunctions.cpp">
+      <Filter>Source Files\Glut %28cpp%29</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
