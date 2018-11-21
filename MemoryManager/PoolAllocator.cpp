@@ -60,7 +60,7 @@ void PoolAllocator::deallocateAll()
 	// Can create problems if user doesn't "forget" the
 	//  pointers to these 'blocks'
 	std::unique_lock<std::shared_mutex> lock_guard(m_mtx);
-	for (auto& i : this->m_entries)
+	for (auto& i : m_entries)
 		i = false;
 }
 

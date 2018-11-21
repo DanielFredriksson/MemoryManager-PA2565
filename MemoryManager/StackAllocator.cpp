@@ -31,7 +31,7 @@ void * StackAllocator::allocate(size_t sizeBytes)
 			// Get current marker location and move marker to top.
 			Marker currMarker = m_marker.fetch_add(sizeBytes);
 
-			ptr = (char*)this->m_memPtr + currMarker;
+			ptr = (char*)m_memPtr + currMarker;
 		}
 		else
 			throw 1;
