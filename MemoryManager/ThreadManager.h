@@ -16,7 +16,7 @@ private:
 
 	std::condition_variable m_cond;
 
-	bool initialized = false;
+	bool m_initialized = false;
 	bool m_shutdown = false;
 
 	std::queue<std::function<void(void)>> m_jobs;
@@ -46,4 +46,4 @@ public:
 
 };
 
-#endif
+#endif //THREAD_MANAGER

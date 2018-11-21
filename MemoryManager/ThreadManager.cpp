@@ -60,7 +60,7 @@ void ThreadManager::init(unsigned int numThreads)
 	}
 
 	m_shutdown = false;
-	initialized = true;
+	m_initialized = true;
 }
 
 int ThreadManager::getThreadID(std::thread::id threadID)

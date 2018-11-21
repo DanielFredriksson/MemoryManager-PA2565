@@ -1,5 +1,6 @@
 #ifndef ALLOCATOR
 #define ALLOCATOR
+
 class Allocator 
 {
 

@@ -37,4 +37,4 @@ public:
 	void cleanUp();
 };
 
-#endif
+#endif //MEMORY_MANAGER

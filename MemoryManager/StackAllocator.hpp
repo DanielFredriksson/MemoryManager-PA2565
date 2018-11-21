@@ -1,7 +1,10 @@
-#pragma once
+#ifndef STACK_ALLOCATOR
+#define STACK_ALLOCATOR
+
+#include <atomic>
 
 #include "Allocator.h"
-#include <atomic>
+
 typedef unsigned int Marker;
 class StackAllocator : private Allocator 
 {
@@ -20,3 +23,5 @@ public:
 
 	void cleanUp();
 };
+
+#endif //STACK_ALLOCATOR
