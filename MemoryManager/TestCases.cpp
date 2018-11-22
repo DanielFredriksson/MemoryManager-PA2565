@@ -66,7 +66,7 @@ void TestCases::runMultiThreaded()
 	std::cout << "Multi-threaded Allocation - Thread Safety" << std::endl;
 
 	std::chrono::system_clock::time_point sleepTill = std::chrono::system_clock::now() + std::chrono::seconds(10);
-	auto func = [&mutex, &sleepTill]() {
+	auto func1 = [&mutex, &sleepTill]() {
 		auto& _memMngr = MemoryManager::getInstance();
 		std::this_thread::sleep_until(sleepTill);
 		void* ptr = _memMngr.randomAllocate(ARCH_BYTESIZE);
@@ -75,7 +75,7 @@ void TestCases::runMultiThreaded()
 		std::cout << ptr << std::endl;
 	};
 	for (int i = 0; i < 4; i++)
-		threadMngr.appendJob(func);
+		threadMngr.appendJob(func1);
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 	std::cout << "----" << std::endl;
 
