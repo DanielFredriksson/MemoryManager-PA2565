@@ -3,6 +3,7 @@
 
 /*
 HOW TO TRACK THE MEMORY:
+- #include "GlutManager.hpp"
 - GlutManager& instance = GlutManager::getInstance();
 - GlutManager* ptr = &instance;
 
