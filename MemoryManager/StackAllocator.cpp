@@ -17,7 +17,7 @@ std::vector<bool> StackAllocator::getUsedMemory()
 	std::vector<bool> usedMemory;
 	unsigned int percentUsed = int(float(m_marker) / float(m_sizeBytes) * 100.f);
 	for (unsigned int i = 0; i < 100; i++)
-		usedMemory.push_back((i > percentUsed) ? false : true);
+		usedMemory.push_back((i < percentUsed) ? true : false);
 	return usedMemory;
 }
 

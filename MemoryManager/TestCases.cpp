@@ -5,6 +5,7 @@
 TestCases::TestCases()
 	: memMngr(MemoryManager::getInstance())
 	, threadMngr(ThreadManager::getInstance())
+	, glutMngr(GlutManager::getInstance())
 {
 }
 
@@ -42,7 +43,10 @@ void TestCases::runMultiThreaded()
 {
 	threadMngr.init(4U);
 	memMngr.setThreads(threadMngr.getThreadIDs());
-	memMngr.addPool(ARCH_BYTESIZE, 4);
+	std::vector<MemoryManager::PoolInstance> poolInstances;
+	poolInstances.push_back(MemoryManager::PoolInstance{ ARCH_BYTESIZE, 4 });
+	memMngr.init(10U * ARCH_BYTESIZE, poolInstances);
+	//memMngr.addPool(ARCH_BYTESIZE, 4);
 
 
 	// Multi-threaded Allocation - Pointer Safety

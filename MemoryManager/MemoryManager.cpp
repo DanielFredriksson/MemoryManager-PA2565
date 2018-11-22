@@ -15,6 +15,18 @@ MemoryManager::~MemoryManager()
 	cleanUp();
 }
 
+void MemoryManager::init(unsigned int stackSizeBytes, std::vector<PoolInstance> poolInstances)
+{
+	addStack(stackSizeBytes);
+	m_currMemUsage.stacks = m_stack->getUsedMemory();
+
+	int currIndex = 0;
+	for (PoolInstance PI : poolInstances) {
+		addPool(PI.sizeBytesEachEntry, PI.numEntries);
+		m_currMemUsage.pools.push_back(m_pools.at(currIndex++)->getUsedMemory());
+	}
+}
+
 void MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries)
 {
 	unsigned int numQuadrants = static_cast<unsigned int>(m_threadIDs.size());
@@ -96,6 +108,20 @@ void MemoryManager::deallocateAllRandom()
 {
 	for (unsigned int i = 0; i < m_pools.size(); i++)
 		m_pools.at(i)->deallocateAll();
+}
+
+void MemoryManager::updateAllocatedSpace()
+{
+	m_currMemUsage.stacks = m_stack->getUsedMemory();
+
+	for (unsigned int i = 0; i < m_pools.size(); i++) {
+		m_currMemUsage.pools.at(i) = m_pools.at(i)->getUsedMemory();
+	}
+}
+
+MemoryManager::MemoryUsage& MemoryManager::getAllocatedSpace()
+{
+	return m_currMemUsage;
 }
 
 void MemoryManager::cleanUp()

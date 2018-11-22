@@ -142,14 +142,15 @@ void PoolAllocator::deallocateSingle(void* address)
 
 	startPoint = static_cast<char*>(m_memPtr);
 	endPoint = static_cast<char*>(address);
-	// Calculates which entry we are deallocating
+	// Calculates which entry we are deallocating 
+	// FIX SIZE! ERROR!!!!
 	int entryIndex = static_cast<int>(static_cast<float>((endPoint - startPoint) / static_cast<float>(sizeof(char))));
 	// Setting the entry to false = deallocation
 	m_entries.at(entryIndex) = false;
 
 	/// STEP 2
 	// Calculate the size of a quadrant
-	int quadrantSize = static_cast<int>(static_cast<float>(m_sizeBytes * (1.f / float(m_numQuadrants))));
+	int quadrantSize = static_cast<int>(static_cast<float>(m_sizeBytes / float(m_numQuadrants)));
 	// Check which quadrant we are in
 	int currentQuadrant = static_cast<int>(static_cast<float>(entryIndex / quadrantSize));
 	// Set that specific quadrant's newest free entry to the one we

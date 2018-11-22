@@ -43,7 +43,7 @@ public:
 			Vector: bools of entries per pool
 	*/
 	std::vector<std::vector<std::vector<bool>>> getVectors();
-	void updateVectors(std::vector<std::vector<bool>*> stacks, std::vector<std::vector<bool>*> pools);
+	void updateVectors(std::vector<std::vector<bool>>& stacks, std::vector<std::vector<bool>>& pools);
 	void addStack(std::vector<bool> stack);
 	void addPool(std::vector<bool> pool);
 };

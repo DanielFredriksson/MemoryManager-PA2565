@@ -9,13 +9,25 @@
 
 class MemoryManager
 {
+public:
+	struct MemoryUsage {
+		std::vector<bool> stacks;
+		std::vector<std::vector<bool>> pools;
+	};
+
+	struct PoolInstance {
+		unsigned int sizeBytesEachEntry;
+		unsigned int numEntries;
+	};
+
 private:
 	std::vector<PoolAllocator*> m_pools;
 	StackAllocator* m_stack;
 	bool m_threadsSet;
 
+	MemoryUsage m_currMemUsage;
+
 private:
-	// GET DA MEMorIH
 	void* getMem(unsigned int sizeBytes);
 
 	// Singleton class shouldn't be able to be copied
@@ -23,6 +35,10 @@ private:
 	void operator=(MemoryManager const&) = delete;
 
 	std::vector<std::thread::id> m_threadIDs;
+
+private:
+	void addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries);
+	void addStack(unsigned int sizeBytes);
 
 public:
 	MemoryManager();
@@ -35,8 +51,7 @@ public:
 		return instance;
 	}
 
-	void addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries);
-	void addStack(unsigned int sizeBytes);
+	void init(unsigned int stackSizeBytes, std::vector<PoolInstance> poolInstances);
 
 	void* singleFrameAllocate(unsigned int sizeBytes);
 	void* randomAllocate(unsigned int sizeBytes);
@@ -46,6 +61,9 @@ public:
 
 	void deallocateSingleRandom(void* ptr, unsigned int sizeOfAlloc);
 	void deallocateAllRandom();
+
+	void updateAllocatedSpace();
+	MemoryUsage& getAllocatedSpace();
 
 	void cleanUp();
 };

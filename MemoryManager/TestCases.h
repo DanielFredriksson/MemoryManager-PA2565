@@ -4,11 +4,13 @@
 #include "Defines.h"
 #include "ThreadManager.h"
 #include "MemoryManager.hpp"
+#include "GlutManager.hpp"
 
 class TestCases {
 private:
 	MemoryManager& memMngr;
 	ThreadManager& threadMngr;
+	GlutManager& glutMngr;
 
 public:
 	TestCases();

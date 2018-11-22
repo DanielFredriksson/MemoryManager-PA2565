@@ -67,17 +67,17 @@ std::vector<std::vector<std::vector<bool>>> GlutManager::getVectors()
 	return stacksAndPools;
 }
 
-void GlutManager::updateVectors(std::vector<std::vector<bool>*> stacks, std::vector<std::vector<bool>*> pools)
+void GlutManager::updateVectors(std::vector<std::vector<bool>>& stacks, std::vector<std::vector<bool>>& pools)
 {
 	// Convert pointerd vector to non-pointered so if threads run out
 	// the vectors won't be affected.
 	std::vector<std::vector<bool>> newStacks;
 	for (int i = 0; i < stacks.size(); i++) {
-		newStacks.push_back(*stacks.at(i));
+		newStacks.push_back(stacks.at(i));
 	}
 	std::vector<std::vector<bool>> newPools;
 	for (int i = 0; i < pools.size(); i++) {
-		newPools.push_back(*pools.at(i));
+		newPools.push_back(pools.at(i));
 	}
 	m_stacks = newStacks;
 	m_pools = newPools;
