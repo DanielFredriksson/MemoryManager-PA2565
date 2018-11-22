@@ -42,7 +42,6 @@ void TestCases::runSingleThreaded()
 void TestCases::runMultiThreaded()
 {
 	threadMngr.init(4U);
-	memMngr.setThreads(threadMngr.getThreadIDs());
 	std::vector<MemoryManager::PoolInstance> poolInstances;
 	poolInstances.push_back(MemoryManager::PoolInstance{ ARCH_BYTESIZE, 4 });
 	memMngr.init(10U * ARCH_BYTESIZE, poolInstances);
