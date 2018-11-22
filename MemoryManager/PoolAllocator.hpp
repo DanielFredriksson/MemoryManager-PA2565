@@ -1,4 +1,5 @@
-#pragma once
+#ifndef POOL_ALLOCATOR
+#define POOL_ALLOCATOR
 
 #include <deque>
 #include <shared_mutex>
@@ -46,5 +47,10 @@ public:
 			std::cout << (int)m_entries[i] << "\n";
 	}
 
+	// Memory tracking for debugging purposes
+	virtual std::vector<bool> getUsedMemory();
+
 	void cleanUp();
 };
+
+#endif //POOL_ALLOCATOR

@@ -159,6 +159,7 @@
     <ClInclude Include="MemoryManager.hpp" />
     <ClInclude Include="PoolAllocator.hpp" />
     <ClInclude Include="StackAllocator.hpp" />
+    <ClInclude Include="ThreadManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Allocator.cpp" />
@@ -166,6 +167,7 @@
     <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="PoolAllocator.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
+    <ClCompile Include="ThreadManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

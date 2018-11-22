@@ -1,6 +1,6 @@
 #include "MemoryManager.hpp"
 
-void* MemoryManager::getMem(size_t sizeBytes)
+void* MemoryManager::getMem(unsigned int sizeBytes)
 {
 	return calloc(1, sizeBytes);
 }
@@ -11,7 +11,7 @@ MemoryManager::MemoryManager()
 }
 MemoryManager::~MemoryManager()
 {
-	this->cleanUp();
+	cleanUp();
 }
 
 PoolAllocator* MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries)
@@ -29,19 +29,19 @@ StackAllocator* MemoryManager::addStack(unsigned int sizeBytes)
 
 void MemoryManager::cleanUp()
 {
-	int loopCount;
+	size_t loopCount;
 
-	loopCount = this->m_pools.size();
+	loopCount = m_pools.size();
 	for (int i = 0; i < loopCount; i++)
-		if (this->m_pools.at(loopCount) != nullptr)
-			delete this->m_pools.at(loopCount);
-	this->m_pools.clear();
-	this->m_pools.resize(0);
+		if (m_pools.at(i) != nullptr)
+			delete m_pools.at(i);
+	m_pools.clear();
+	m_pools.resize(0);
 
-	loopCount = this->m_stacks.size();
+	loopCount = m_stacks.size();
 	for (int i = 0; i < loopCount; i++)
-		if (this->m_stacks.at(loopCount) != nullptr)
-			delete this->m_stacks.at(loopCount);
-	this->m_stacks.clear();
-	this->m_stacks.resize(0);
+		if (m_stacks.at(i) != nullptr)
+			delete m_stacks.at(i);
+	m_stacks.clear();
+	m_stacks.resize(0);
 }

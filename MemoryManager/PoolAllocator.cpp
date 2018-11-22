@@ -145,11 +145,19 @@ void PoolAllocator::deallocateSingle(void* address)
 	m_usedMtxs.at(currentQuadrant) = ATOMIC_VAR_INIT(false);
 }
 
-void PoolAllocator::cleanUp()
+std::vector<bool> PoolAllocator::getUsedMemory()
+{
+	std::vector<bool> usedMemory;
+	for (int i = 0; i < m_entries.size(); i++)
+		usedMemory.push_back(m_entries[i]);
+	return usedMemory;
+}
+
+/*void PoolAllocator::cleanUp()
 {
 	if (m_memPtr != nullptr)
 	{
 		free(m_memPtr);
 		m_memPtr = nullptr;
 	}
-}
+}*/
