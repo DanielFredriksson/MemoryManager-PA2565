@@ -168,7 +168,6 @@
     <ClInclude Include="RenderFunctions.hpp" />
     <ClInclude Include="StackAllocator.hpp" />
     <ClInclude Include="TestCases.h" />
-    <ClInclude Include="ThreadManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Allocator.cpp" />
@@ -179,7 +178,6 @@
     <ClCompile Include="RenderFunctions.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
     <ClCompile Include="TestCases.cpp" />
-    <ClCompile Include="ThreadManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

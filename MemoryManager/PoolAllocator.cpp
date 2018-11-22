@@ -69,7 +69,7 @@ PoolAllocator::PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int 
 	for (unsigned int i = 0; i < numEntries; i++)
 		m_entries.emplace_back(false);
 
-	m_usedQuadrants.resize(4);
+	m_usedQuadrants.resize(m_numQuadrants);
 	for (unsigned int i = 0; i < m_usedQuadrants.size(); i++)
 		m_usedQuadrants[i] = ATOMIC_VAR_INIT(false);
 

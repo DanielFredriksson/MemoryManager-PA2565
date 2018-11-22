@@ -2,14 +2,12 @@
 #define TEST_CASES
 
 #include "Defines.h"
-#include "ThreadManager.h"
 #include "MemoryManager.hpp"
 #include "GlutManager.hpp"
 
 class TestCases {
 private:
 	MemoryManager& memMngr;
-	ThreadManager& threadMngr;
 	GlutManager& glutMngr;
 
 public:
@@ -18,6 +16,7 @@ public:
 
 	void runSingleThreaded();
 	void runMultiThreaded();
+	void efficiencyTest();
 
 };
 
