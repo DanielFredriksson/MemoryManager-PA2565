@@ -32,7 +32,7 @@ int PoolAllocator::findFreeEntry(int quadrent)
 	// We are looking for the next free entry
 	while (m_entries.at(entryNum) == true)
 	{
-		tempAddress++;
+		tempAddress += m_entrySize;
 		entryNum++;
 
 		// If reached quadrant end...
