@@ -36,7 +36,7 @@ public:
 	PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int numEntries, unsigned int numQuadrants);
 	virtual ~PoolAllocator();
 
-	void* allocate(int quadrant);
+	void* allocate();
 	
 	virtual void deallocateAll();
 

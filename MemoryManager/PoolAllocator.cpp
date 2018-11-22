@@ -87,14 +87,14 @@ PoolAllocator::~PoolAllocator()
 	cleanUp();
 }
 
-void* PoolAllocator::allocate(int quadrant)
+void* PoolAllocator::allocate()
 {
 	// Individual locks; used to check if a 'unique_lock' is currently in play
 	// NOTE: 'unique_lock' in play = we are currently running 'deallocateAll()'
 	std::shared_lock<std::shared_mutex> lock(m_mtx);
 	// We're looking for a quadrant that's not being searched (= false)
 	bool expected = false;
-	int currentQuadrant = quadrant;
+	int currentQuadrant = 0;
 	// A returnValue of '-1' means the quadrant if completely full
 	int entryReturnNum = -1;
 
