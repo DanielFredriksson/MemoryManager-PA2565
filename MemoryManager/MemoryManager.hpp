@@ -21,7 +21,7 @@ private:
 	MemoryManager(MemoryManager const&) = delete;
 	void operator=(MemoryManager const&) = delete;
 
-	std::vector<unsigned int> m_threads;
+	std::vector<std::thread::id> m_threads;
 
 public:
 	MemoryManager();
@@ -40,7 +40,8 @@ public:
 	void* singleFrameAllocate(unsigned int sizeBytes);
 	void* randomAllocate(unsigned int sizeBytes);
 
-	void setThreads(std::vector<std::thread> threads);
+	void setThreads(std::vector<std::thread::id> threads);
+	unsigned int getThreadID(std::thread::id id) const;
 
 	void cleanUp();
 };
