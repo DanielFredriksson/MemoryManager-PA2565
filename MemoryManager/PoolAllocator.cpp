@@ -96,7 +96,7 @@ void* PoolAllocator::allocate(int quadrant)
 
 		entryReturnNum = findFreeEntry(currentQuadrant);
 		// Set the quadrant's 'm_usedMtxs' back to false for other threads
-		m_usedMtxs[currentQuadrant] = ATOMIC_VAR_INIT(false);
+		m_usedMtxs[currentQuadrant] = false;
 	}
 	// Calculating which address we have allocated, casting it to a void*
 	char* returnAddress = static_cast<char*>(m_memPtr);
@@ -142,7 +142,7 @@ void PoolAllocator::deallocateSingle(void* address)
 	while (!m_usedMtxs[currentQuadrant].compare_exchange_strong(expected, true))
 		;//DO NOTHING
 	m_quadFreeAddress.at(currentQuadrant) = address;
-	m_usedMtxs.at(currentQuadrant) = ATOMIC_VAR_INIT(false);
+	m_usedMtxs.at(currentQuadrant) = false;
 }
 
 std::vector<bool> PoolAllocator::getUsedMemory()
@@ -153,11 +153,11 @@ std::vector<bool> PoolAllocator::getUsedMemory()
 	return usedMemory;
 }
 
-/*void PoolAllocator::cleanUp()
+void PoolAllocator::cleanUp()
 {
 	if (m_memPtr != nullptr)
 	{
 		free(m_memPtr);
 		m_memPtr = nullptr;
 	}
-}*/
+}

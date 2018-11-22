@@ -24,7 +24,7 @@ private:
 	unsigned int m_numEntries;
 
 	std::shared_mutex m_mtx;
-	std::vector<std::atomic_bool> m_usedMtxs;
+	std::deque<std::atomic_bool> m_usedMtxs;
 
 	std::vector<void*> m_quadFreeAddress;
 
