@@ -51,7 +51,7 @@ void renderRectangle(double sizeX, double sizeY, double startX, double startY)
 void renderBar(double startX, double startY, std::vector<bool> entries, GLfloat entryColor[])
 {
 	// Calculate the neccessary data
-	double outerPadding = (BARSIZE_X) / entries.size() / 2;
+	double outerPadding = (BARSIZE_X) / 200;
 	double rectSizeX = (BARSIZE_X - outerPadding * 2) / entries.size();
 	double rectSizeY = BARSIZE_Y - 2 * outerPadding;
 	double innerStartX = startX + outerPadding;
