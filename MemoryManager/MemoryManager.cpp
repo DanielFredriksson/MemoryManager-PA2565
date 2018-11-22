@@ -68,33 +68,13 @@ void* MemoryManager::randomAllocate(unsigned int sizeBytes) {
 	// Check for an appropriate sized pool
 	for (unsigned int i = 0; i < m_pools.size(); i++) {
 		if (sizeBytes <= m_pools.at(i)->getEntrySize()) {
-			ptr = m_pools.at(i)->allocate(getThreadID(std::this_thread::get_id()));
+			ptr = m_pools.at(i)->allocate();
 		}
 	}
 	if (ptr == nullptr)
 		throw std::exception("MemoryManager::randomAllocate : No pool allocated for size " + sizeBytes);
 
 	return ptr;
-
-}
-
-void MemoryManager::setThreads(std::vector<std::thread::id> threads) {
-	if (!m_threadsSet) {
-		for (unsigned int i = 0; i < threads.size(); i++)
-			m_threadIDs.push_back(threads.at(i));
-		m_threadsSet = true;
-	}
-}
-
-unsigned int MemoryManager::getThreadID(std::thread::id id) const{
-
-	for (unsigned int i = 0; i < m_threadIDs.size(); i++) {
-		if (id == m_threadIDs.at(i))
-			return i;
-	}
-	throw std::exception("MemoryManager::getThreadID(): Unmapped thread used");
-
-	return -1;
 }
 
 void MemoryManager::deallocateSingleRandom(void* ptr, unsigned int sizeOfAlloc)

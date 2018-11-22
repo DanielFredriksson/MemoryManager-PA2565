@@ -56,9 +56,6 @@ public:
 	void* singleFrameAllocate(unsigned int sizeBytes);
 	void* randomAllocate(unsigned int sizeBytes);
 
-	void setThreads(std::vector<std::thread::id> threads);
-	unsigned int getThreadID(std::thread::id id) const;
-
 	void deallocateSingleRandom(void* ptr, unsigned int sizeOfAlloc);
 	void deallocateAllRandom();
 	void deallocateStack();
