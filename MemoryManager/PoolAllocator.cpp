@@ -72,29 +72,36 @@ PoolAllocator::~PoolAllocator()
 	cleanUp();
 }
 
-void * PoolAllocator::allocate(int quadrant)
+void* PoolAllocator::allocate(int quadrant)
 {
+	// Individual locks; used to check if a 'unique_lock' is currently in play
+	// NOTE: 'unique_lock' in play = we are currently running 'deallocateAll()'
 	std::shared_lock<std::shared_mutex> lock(m_mtx);
-	// ALTERNATIVE #1: A size4 array of atomic bools for each quadrant
-
+	// We're looking for a quadrant that's not being searched (= false)
 	bool expected = false;
-	while (!m_usedMtxs.at(quadrant).compare_exchange_strong(expected, true))
-		// DO STUFF
-	/*
-	
-	forloop(4 times, for 4 quadrants)
-	{
-		while (bool (i) is locked)
-			do nothing;
+	int currentQuadrant = quadrant;
+	// A returnValue of '-1' means the quadrant if completely full
+	int entryReturnNum = -1;
 
-		if (bool(i) is not locked)
+	while (entryReturnNum == -1)
+	{	// If the quadrant's 'm_usedMtxs' == true, that means another thread is
+		// searching in that quadrant already. So we look through the next
+		// quadrant in the hopes that it's not being searched through.
+		while (!m_usedMtxs.at(currentQuadrant).compare_exchange_strong(expected, true))
 		{
-			lock bool(i) and check that quadrant
+			currentQuadrant++;
+			if (currentQuadrant > 3)
+				currentQuadrant = 0;
 		}
-	}
 
-	*/
-	unsigned int index = PoolAllocator::findFreeEntry(quadrant);
+		entryReturnNum = findFreeEntry(currentQuadrant);
+		// Set the quadrant's 'm_usedMtxs' back to false for other threads
+		m_usedMtxs[currentQuadrant] = ATOMIC_VAR_INIT(false);
+	}
+	// Calculating which address we have allocated, casting it to a void*
+	char* returnAddress = static_cast<char*>(m_memPtr);
+	returnAddress += (entryReturnNum * m_entrySize);
+	return static_cast<void*>(returnAddress);
 }
 
 void PoolAllocator::deallocateAll()
@@ -130,10 +137,12 @@ void PoolAllocator::deallocateSingle(void* address)
 	int currentQuadrant = static_cast<int>(static_cast<float>(entryIndex / quadrantSize));
 	// Set that specific quadrant's newest free entry to the one we
 	// just deallocated.
-	
-	// bool expected = false;
-	// while (!atomic bool array [i].compare_exchange_strong(expected, true))
+	bool expected = false;
+	// Wait for the quadrant to be free of other threads
+	while (!m_usedMtxs[currentQuadrant].compare_exchange_strong(expected, true))
+		;//DO NOTHING
 	m_quadFreeAddress.at(currentQuadrant) = address;
+	m_usedMtxs.at(currentQuadrant) = ATOMIC_VAR_INIT(false);
 }
 
 void PoolAllocator::cleanUp()
