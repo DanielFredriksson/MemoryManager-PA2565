@@ -18,6 +18,7 @@ public:
 	struct PoolInstance {
 		unsigned int sizeBytesEachEntry;
 		unsigned int numEntries;
+		unsigned int numQuadrants;
 	};
 
 private:
@@ -37,7 +38,7 @@ private:
 	std::vector<std::thread::id> m_threadIDs;
 
 private:
-	void addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries);
+	void addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries, unsigned int numQuadrants);
 	void addStack(unsigned int sizeBytes);
 
 public:

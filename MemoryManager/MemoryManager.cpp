@@ -22,14 +22,13 @@ void MemoryManager::init(unsigned int stackSizeBytes, std::vector<PoolInstance> 
 
 	int currIndex = 0;
 	for (PoolInstance PI : poolInstances) {
-		addPool(PI.sizeBytesEachEntry, PI.numEntries);
+		addPool(PI.sizeBytesEachEntry, PI.numEntries, PI.numQuadrants);
 		m_currMemUsage.pools.push_back(m_pools.at(currIndex++)->getUsedMemory());
 	}
 }
 
-void MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries)
+void MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries, unsigned int numQuadrants)
 {
-	unsigned int numQuadrants = static_cast<unsigned int>(m_threadIDs.size());
 	PoolAllocator* temp = new PoolAllocator(getMem(sizeBytesEachEntry * numEntries), sizeBytesEachEntry, numEntries, numQuadrants);
 	std::vector<PoolAllocator*>::iterator it = m_pools.begin();
 	int pos = 0;
