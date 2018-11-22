@@ -28,4 +28,3 @@ public:
 
 	void updateVectors(std::vector<std::vector<bool>> stacks, std::vector<std::vector<bool>> pools);
 };
-
