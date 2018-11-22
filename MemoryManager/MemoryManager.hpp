@@ -12,6 +12,7 @@ class MemoryManager
 private:
 	std::vector<PoolAllocator*> m_pools;
 	StackAllocator* m_stack;
+	bool m_threadsSet;
 
 private:
 	// GET DA MEMorIH
@@ -21,7 +22,7 @@ private:
 	MemoryManager(MemoryManager const&) = delete;
 	void operator=(MemoryManager const&) = delete;
 
-	std::vector<std::thread::id> m_threads;
+	std::vector<std::thread::id> m_threadIDs;
 
 public:
 	MemoryManager();
@@ -42,6 +43,9 @@ public:
 
 	void setThreads(std::vector<std::thread::id> threads);
 	unsigned int getThreadID(std::thread::id id) const;
+
+	void deallocateSingleRandom(void* ptr, unsigned int sizeOfAlloc);
+	void deallocateAllRandom();
 
 	void cleanUp();
 };

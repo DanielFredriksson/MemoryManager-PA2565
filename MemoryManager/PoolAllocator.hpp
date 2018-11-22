@@ -22,9 +22,10 @@ private:
 
 	size_t m_entrySize;
 	unsigned int m_numEntries;
+	unsigned int m_numQuadrants;
 
 	std::shared_mutex m_mtx;
-	std::deque<std::atomic_bool> m_usedMtxs;
+	std::deque<std::atomic_bool> m_usedQuadrants;
 
 	std::vector<void*> m_quadFreeAddress;
 
@@ -32,7 +33,7 @@ public:
 	typedef unsigned int ID;
 
 public:
-	PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int numEntries);
+	PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int numEntries, unsigned int numQuadrants);
 	virtual ~PoolAllocator();
 
 	void* allocate(int quadrant);

@@ -8,6 +8,7 @@ void* MemoryManager::getMem(unsigned int sizeBytes)
 MemoryManager::MemoryManager()
 {
 	m_stack = nullptr;
+	m_threadsSet = false;
 }
 MemoryManager::~MemoryManager()
 {
@@ -16,7 +17,8 @@ MemoryManager::~MemoryManager()
 
 void MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries)
 {
-	PoolAllocator* temp = new PoolAllocator(getMem(sizeBytesEachEntry * numEntries), sizeBytesEachEntry, numEntries);
+	unsigned int numQuadrants = static_cast<unsigned int>(m_threadIDs.size());
+	PoolAllocator* temp = new PoolAllocator(getMem(sizeBytesEachEntry * numEntries), sizeBytesEachEntry, numEntries, numQuadrants);
 	std::vector<PoolAllocator*>::iterator it = m_pools.begin();
 	int pos = 0;
 	bool largerFound = false;
@@ -65,21 +67,35 @@ void* MemoryManager::randomAllocate(unsigned int sizeBytes) {
 }
 
 void MemoryManager::setThreads(std::vector<std::thread::id> threads) {
-	m_threads.clear();
-	for (unsigned int i = 0; i < threads.size(); i++) {
-		m_threads.push_back(threads.at(i));
+	if (!m_threadsSet) {
+		for (unsigned int i = 0; i < threads.size(); i++)
+			m_threadIDs.push_back(threads.at(i));
+		m_threadsSet = true;
 	}
 }
 
 unsigned int MemoryManager::getThreadID(std::thread::id id) const{
 
-	for (unsigned int i = 0; i < m_threads.size(); i++) {
-		if (id == m_threads.at(i))
+	for (unsigned int i = 0; i < m_threadIDs.size(); i++) {
+		if (id == m_threadIDs.at(i))
 			return i;
 	}
 	throw std::exception("MemoryManager::getThreadID(): Unmapped thread used");
 
 	return -1;
+}
+
+void MemoryManager::deallocateSingleRandom(void* ptr, unsigned int sizeOfAlloc)
+{
+	for (unsigned int i = 0; i < m_pools.size(); i++)
+		if (sizeOfAlloc <= m_pools.at(i)->getEntrySize())
+			m_pools.at(i)->deallocateSingle(ptr);
+}
+
+void MemoryManager::deallocateAllRandom()
+{
+	for (unsigned int i = 0; i < m_pools.size(); i++)
+		m_pools.at(i)->deallocateAll();
 }
 
 void MemoryManager::cleanUp()
