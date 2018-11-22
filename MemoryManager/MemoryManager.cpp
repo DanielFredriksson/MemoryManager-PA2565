@@ -7,24 +7,56 @@ void* MemoryManager::getMem(unsigned int sizeBytes)
 
 MemoryManager::MemoryManager()
 {
-
+	m_stack = nullptr;
 }
 MemoryManager::~MemoryManager()
 {
 	cleanUp();
 }
 
-PoolAllocator* MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries)
+void MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries)
 {
 	PoolAllocator* temp = new PoolAllocator(getMem(sizeBytesEachEntry * numEntries), sizeBytesEachEntry, numEntries);
-	m_pools.push_back(temp);
-	return m_pools.back();
+	std::vector<PoolAllocator*>::iterator it = m_pools.begin();
+	int pos = 0;
+	bool largerFound = false;
+
+	for (it; it != m_pools.end(); it++) {
+		if (sizeBytesEachEntry < (*it)->getEntrySize()) {
+			m_pools.insert(it, temp);
+			largerFound = true;
+		}
+	}
+	if (!largerFound) {
+		m_pools.push_back(temp);
+	}
 }
 
-StackAllocator* MemoryManager::addStack(unsigned int sizeBytes)
+void MemoryManager::addStack(unsigned int sizeBytes)
 {
-	m_stacks.push_back(new StackAllocator(getMem(sizeBytes), sizeBytes));
-	return m_stacks.back();
+	if(m_stack == nullptr)
+		m_stack = new StackAllocator(getMem(sizeBytes), sizeBytes);
+
+}
+
+void* MemoryManager::singleFrameAllocate(unsigned int sizeBytes) {
+	return m_stack->allocate(sizeBytes);
+}
+
+void* MemoryManager::randomAllocate(unsigned int sizeBytes) {
+	void* ptr = nullptr;
+	for (unsigned int i = 0; i < m_pools.size(); i++) {
+		if (sizeBytes < m_pools.at(i)->getEntrySize()) {
+			//ptr = m_pools.at(i)->allocate();
+		}
+
+	}
+
+	return ptr;
+}
+
+void MemoryManager::setThreads(std::vector<std::thread> threads) {
+	
 }
 
 void MemoryManager::cleanUp()
@@ -38,10 +70,5 @@ void MemoryManager::cleanUp()
 	m_pools.clear();
 	m_pools.resize(0);
 
-	loopCount = m_stacks.size();
-	for (unsigned int i = 0; i < loopCount; i++)
-		if (m_stacks.at(i) != nullptr)
-			delete m_stacks.at(i);
-	m_stacks.clear();
-	m_stacks.resize(0);
+	delete m_stack;
 }

@@ -5,12 +5,13 @@
 
 #include "PoolAllocator.hpp"
 #include "StackAllocator.hpp"
+#include <thread>
 
 class MemoryManager
 {
 private:
 	std::vector<PoolAllocator*> m_pools;
-	std::vector<StackAllocator*> m_stacks;
+	StackAllocator* m_stack;
 
 private:
 	// GET DA MEMorIH
@@ -19,6 +20,8 @@ private:
 	// Singleton class shouldn't be able to be copied
 	MemoryManager(MemoryManager const&) = delete;
 	void operator=(MemoryManager const&) = delete;
+
+	std::vector<unsigned int> m_threads;
 
 public:
 	MemoryManager();
@@ -31,8 +34,13 @@ public:
 		return instance;
 	}
 
-	PoolAllocator* addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries);
-	StackAllocator* addStack(unsigned int sizeBytes);
+	void addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries);
+	void addStack(unsigned int sizeBytes);
+
+	void* singleFrameAllocate(unsigned int sizeBytes);
+	void* randomAllocate(unsigned int sizeBytes);
+
+	void setThreads(std::vector<std::thread> threads);
 
 	void cleanUp();
 };

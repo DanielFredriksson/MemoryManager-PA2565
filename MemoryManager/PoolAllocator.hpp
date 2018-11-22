@@ -49,6 +49,8 @@ public:
 
 	// Memory tracking for debugging purposes
 	virtual std::vector<bool> getUsedMemory();
+	
+	unsigned int getEntrySize() const;
 
 	void cleanUp();
 };

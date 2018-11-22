@@ -157,6 +157,10 @@ std::vector<bool> PoolAllocator::getUsedMemory()
 	return usedMemory;
 }
 
+unsigned int PoolAllocator::getEntrySize() const{
+	return static_cast<unsigned int>(m_entrySize);
+}
+
 void PoolAllocator::cleanUp()
 {
 	if (m_memPtr != nullptr)
