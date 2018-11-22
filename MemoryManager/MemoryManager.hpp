@@ -6,7 +6,7 @@
 #include "PoolAllocator.hpp"
 #include "StackAllocator.hpp"
 
-class MemoryManager 
+class MemoryManager
 {
 private:
 	std::vector<PoolAllocator*> m_pools;

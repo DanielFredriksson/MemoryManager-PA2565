@@ -1,87 +1,167 @@
+#include "Defines.h"
 #include "PoolAllocator.hpp"
-
 /*
 	Private Functions
 */
-unsigned int PoolAllocator::findFreeEntry()
+
+// 'quadrent' = Thread ID (0, 1, 2, or 3)
+int PoolAllocator::findFreeEntry(int quadrent)
 {
-	for (unsigned int i = 0; i < m_entries.size(); i++) {
-		bool expected = false;
-		// Atomic compare and exchange, returns true if 'used == expected', else puts whatever 
-		// 'used' was into 'expected' and tries again
-		//if (m_entries[i]->used.compare_exchange_strong(expected, true))
-			//return i;
+	int returnValue;
+
+	void* allocationAddress = m_quadFreeAddress.at(quadrent);
+	// If true = quadrent is already fully allocated!
+	// EARLY EXIT (-1)
+	if (allocationAddress == nullptr)
+		return -1;
+
+	char* tempAddress;
+	// Address of pool's start
+	tempAddress = static_cast<char*>(m_memPtr);
+	// Address of quadrent's start
+	tempAddress += static_cast<int>(static_cast<float>(quadrent) * static_cast<float>(m_sizeBytes) * 0.25f);
+	// Which specific pool entry we are looking at
+	int entryNum = static_cast<int>((static_cast<char*>(allocationAddress) - static_cast<char*>(m_memPtr)) / sizeof(char));
+	returnValue = entryNum;
+	// Set that entry to 'allocated'
+	m_entries.at(entryNum) = true;
+
+	tempAddress = static_cast<char*>(m_quadFreeAddress.at(quadrent));
+
+	void* startAddress = static_cast<void*>(tempAddress);
+	void* stopAddress = static_cast<void*>(tempAddress += static_cast<int>(static_cast<float>(m_sizeBytes) * 0.25f));
+	// We are looking for the next free entry
+	while (m_entries.at(entryNum) == true)
+	{
+		tempAddress += m_entrySize;
+		entryNum++;
+
+		// If reached quadrant end...
+		if (tempAddress == stopAddress)
+			// ... search from quadrant start
+			tempAddress = static_cast<char*>(startAddress);
+		// If reaching where we started = quadrant is completely full!
+		if (tempAddress == allocationAddress)
+		{	// '== nullptr' means that the memory is full.
+			m_quadFreeAddress.at(quadrent) = nullptr;
+		}
 	}
-	return -1;
+	// 'returnValue' = 'entryNum'
+	return returnValue;
 }
 
 /*
 	Public Functions
 */
 
-PoolAllocator::PoolAllocator(void* memPtr, unsigned int sizeBytesEachEntry, unsigned int numEntries) 
-	: Allocator(memPtr, sizeBytesEachEntry * numEntries)
+PoolAllocator::PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int numEntries) 
+	: Allocator(memPtr, entrySize * numEntries)
 {
-	m_sizeEachEntry = sizeBytesEachEntry;
+	if (m_entrySize % ARCH_BYTESIZE != 0)
+		throw std::exception("PoolAllocator::PoolAllocator(): Entry size was not a multiple of " + ARCH_BYTESIZE);
+
+	m_entrySize = entrySize;
 	m_numEntries = numEntries;
 
 	for (unsigned int i = 0; i < numEntries; i++)
 		m_entries.emplace_back(false);
+
+	m_usedMtxs.resize(4);
+	for (unsigned int i = 0; i < m_usedMtxs.size(); i++)
+		m_usedMtxs[i] = ATOMIC_VAR_INIT(false);
 }
 
 PoolAllocator::~PoolAllocator()
 {
-	//this->cleanUp();
+	cleanUp();
 }
 
-void * PoolAllocator::allocate()
+void* PoolAllocator::allocate(int quadrant)
 {
-	// Locks access to allocation while being deallocated
-	std::shared_lock<std::shared_mutex> lock_guard(m_mtx);
-	unsigned int index = PoolAllocator::findFreeEntry();
-	if (index == -1) {
-		// GET SOME MOH MEM BICH
-		return nullptr;
-	}
-	else {
-		// Makes sure any access to this entry in the memory is unaccessible by other threads
-		//std::unique_lock<std::shared_mutex> lock_guard(m_entries[index]->mu);
+	// Individual locks; used to check if a 'unique_lock' is currently in play
+	// NOTE: 'unique_lock' in play = we are currently running 'deallocateAll()'
+	std::shared_lock<std::shared_mutex> lock(m_mtx);
+	// We're looking for a quadrant that's not being searched (= false)
+	bool expected = false;
+	int currentQuadrant = quadrant;
+	// A returnValue of '-1' means the quadrant if completely full
+	int entryReturnNum = -1;
 
-		//m_entries[index]->val = std::this_thread::get_id();
-		sizeof(Entry);
+	while (entryReturnNum == -1)
+	{	// If the quadrant's 'm_usedMtxs' == true, that means another thread is
+		// searching in that quadrant already. So we look through the next
+		// quadrant in the hopes that it's not being searched through.
+		while (!m_usedMtxs.at(currentQuadrant).compare_exchange_strong(expected, true))
+		{
+			currentQuadrant++;
+			if (currentQuadrant > 3)
+				currentQuadrant = 0;
+		}
 
-		// Return memory adress for the entry (memory_bottom_pointer + entry * size_of_entry)
-		return static_cast<char*>(m_memPtr) + index * m_sizeEachEntry;
+		entryReturnNum = findFreeEntry(currentQuadrant);
+		// Set the quadrant's 'm_usedMtxs' back to false for other threads
+		m_usedMtxs[currentQuadrant] = false;
 	}
+	// Calculating which address we have allocated, casting it to a void*
+	char* returnAddress = static_cast<char*>(m_memPtr);
+	returnAddress += (entryReturnNum * m_entrySize);
+	return static_cast<void*>(returnAddress);
 }
 
 void PoolAllocator::deallocateAll()
 {
-	// Can create problems if user doesn't "forget" the
-	//  pointers to these 'blocks'
-	std::unique_lock<std::shared_mutex> lock_guard(m_mtx);
+	std::unique_lock<std::shared_mutex> lock(m_mtx);
+
 	for (auto& i : m_entries)
 		i = false;
+
+	// Set all new freeEntries (each quadrant)
+	int quadrantSize = (int)((float)m_numEntries * 0.25f);
+	
+	for (int i = 0; i < 4; i++)
+		m_quadFreeAddress.at(i) = (static_cast<char*>(m_memPtr) + (quadrantSize * i));
 }
 
-bool PoolAllocator::removeEntry(const ID id)
-{
-	return false;
+void PoolAllocator::deallocateSingle(void* address)
+{	/// STEP 1
+	char* startPoint;
+	char* endPoint;
+
+	startPoint = static_cast<char*>(m_memPtr);
+	endPoint = static_cast<char*>(address);
+	// Calculates which entry we are deallocating
+	int entryIndex = static_cast<int>(static_cast<float>((endPoint - startPoint) / static_cast<float>(sizeof(char))));
+	// Setting the entry to false = deallocation
+	m_entries.at(entryIndex) = false;
+
+	/// STEP 2
+	// Calculate the size of a quadrant
+	int quadrantSize = static_cast<int>(static_cast<float>(m_numEntries * 0.25f));
+	// Check which quadrant we are in
+	int currentQuadrant = static_cast<int>(static_cast<float>(entryIndex / quadrantSize));
+	// Set that specific quadrant's newest free entry to the one we
+	// just deallocated.
+	bool expected = false;
+	// Wait for the quadrant to be free of other threads
+	while (!m_usedMtxs[currentQuadrant].compare_exchange_strong(expected, true))
+		;//DO NOTHING
+	m_quadFreeAddress.at(currentQuadrant) = address;
+	m_usedMtxs.at(currentQuadrant) = false;
 }
 
 std::vector<bool> PoolAllocator::getUsedMemory()
 {
 	std::vector<bool> usedMemory;
-	for (int i = 0; i < m_entries.size(); i++)
+	for (unsigned int i = 0; i < m_entries.size(); i++)
 		usedMemory.push_back(m_entries[i]);
 	return usedMemory;
 }
 
-/*void PoolAllocator::cleanUp()
+void PoolAllocator::cleanUp()
 {
-	if (this->m_memPtr != nullptr)
+	if (m_memPtr != nullptr)
 	{
-		free(this->m_memPtr);
-		this->m_memPtr = nullptr;
+		free(m_memPtr);
+		m_memPtr = nullptr;
 	}
-}*/
+}

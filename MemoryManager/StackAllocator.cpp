@@ -1,3 +1,4 @@
+#include "Defines.h"
 #include "StackAllocator.hpp"
 
 
@@ -45,7 +46,7 @@ void* StackAllocator::allocate(unsigned int sizeBytes)
 			ptr = (char*)m_memPtr + currMarker;
 		}
 		else
-			throw std::exception("StackAllocator::allocate : Tried to allocate more memory than was available.");
+			throw std::overflow_error("StackAllocator::allocate : Tried to allocate more memory than was available.");
 	//}
 	//catch (int e) {
 	//	std::cout << "StackAllocator::allocate : An EXCEPTION occured! Exception #" << e << '\n';
@@ -68,7 +69,10 @@ void StackAllocator::cleanUp()
 }
 
 unsigned int StackAllocator::padMemory(unsigned int sizeBytes) {
-	unsigned int paddedMemory = sizeBytes % 8;
-	paddedMemory = sizeBytes + (8 - paddedMemory);
+	unsigned int paddedMemory = sizeBytes % ARCH_BYTESIZE;
+	if (paddedMemory != 0)
+		paddedMemory = sizeBytes + (ARCH_BYTESIZE - paddedMemory);
+	else
+		paddedMemory = sizeBytes;
 	return paddedMemory;
 }
