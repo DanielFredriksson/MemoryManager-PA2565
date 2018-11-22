@@ -69,14 +69,14 @@ PoolAllocator::PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int 
 	for (unsigned int i = 0; i < numEntries; i++)
 		m_entries.emplace_back(false);
 
-	m_usedQuadrants.resize(4);
+	m_usedQuadrants.resize(numQuadrants);
 	for (unsigned int i = 0; i < m_usedQuadrants.size(); i++)
 		m_usedQuadrants[i] = ATOMIC_VAR_INIT(false);
 
 	// Set all new freeEntries (each quadrant)
 	// Wrong calculation!! ERROR
 	// int quadrantSize = static_cast<int>((static_cast<float>(m_numEntries) * 0.25f));
-	int quadrantSize = static_cast<int>((static_cast<float>(m_sizeBytes) * (1.f / float(m_numQuadrants))));
+	int quadrantSize = static_cast<int>((static_cast<float>(m_sizeBytes) / float(m_numQuadrants)));
 
 	for (int i = 0; i < m_numQuadrants; i++)
 		m_quadFreeAddress.emplace_back(static_cast<char*>(m_memPtr) + (quadrantSize * i));
@@ -105,7 +105,7 @@ void* PoolAllocator::allocate(int quadrant)
 		while (!m_usedQuadrants.at(currentQuadrant).compare_exchange_strong(expected, true))
 		{
 			currentQuadrant++;
-			if (currentQuadrant > 3)
+			if (currentQuadrant >= m_numQuadrants)
 				currentQuadrant = 0;
 		}
 
@@ -127,7 +127,7 @@ void PoolAllocator::deallocateAll()
 		i = false;
 
 	// Set all new freeEntries (each quadrant)
-	// Wrong calculation!! ERROR
+	/// Wrong calculation!! ERROR
 	// int quadrantSize = static_cast<int>((static_cast<float>(m_numEntries) * 0.25f));
 	int quadrantSize = static_cast<int>((static_cast<float>(m_sizeBytes) / static_cast<float>(m_numQuadrants)));
 
@@ -144,15 +144,15 @@ void PoolAllocator::deallocateSingle(void* address)
 	endPoint = static_cast<char*>(address);
 	// Calculates which entry we are deallocating 
 	// FIX SIZE! ERROR!!!!
-	int entryIndex = static_cast<int>(static_cast<float>((endPoint - startPoint) / static_cast<float>(sizeof(char))));
+	int entryIndex = static_cast<int>(static_cast<float>((endPoint - startPoint) / static_cast<float>(m_entrySize)));
 	// Setting the entry to false = deallocation
 	m_entries.at(entryIndex) = false;
 
 	/// STEP 2
 	// Calculate the size of a quadrant
-	int quadrantSize = static_cast<int>(static_cast<float>(m_sizeBytes / float(m_numQuadrants)));
+	int quadrantEntryCount = static_cast<int>(static_cast<float>(m_numEntries / float(m_numQuadrants)));
 	// Check which quadrant we are in
-	int currentQuadrant = static_cast<int>(static_cast<float>(entryIndex / quadrantSize));
+	int currentQuadrant = static_cast<int>(static_cast<float>(entryIndex / quadrantEntryCount));
 	// Set that specific quadrant's newest free entry to the one we
 	// just deallocated.
 	bool expected = false;
