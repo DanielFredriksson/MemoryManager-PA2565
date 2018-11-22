@@ -26,7 +26,7 @@ void MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEnt
 	// Check for pools with entires larger than the one being added
 	for (it; it != m_pools.end(); it++) {
 		if (sizeBytesEachEntry < (*it)->getEntrySize()) {
-			// If found, insert it before it
+			// If found a pool with larger entries, insert the new pool before the larger pool
 			m_pools.insert(it, temp);
 			largerFound = true;
 		}
@@ -96,6 +96,10 @@ void MemoryManager::deallocateAllRandom()
 {
 	for (unsigned int i = 0; i < m_pools.size(); i++)
 		m_pools.at(i)->deallocateAll();
+}
+
+void MemoryManager::deallocateStack() {
+	m_stack->deallocateAll();
 }
 
 void MemoryManager::cleanUp()

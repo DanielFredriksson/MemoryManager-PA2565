@@ -46,6 +46,7 @@ public:
 
 	void deallocateSingleRandom(void* ptr, unsigned int sizeOfAlloc);
 	void deallocateAllRandom();
+	void deallocateStack();
 
 	void cleanUp();
 };
