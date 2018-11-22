@@ -2,17 +2,20 @@
 #define TEST_CASES
 
 #include "Defines.h"
+#include "ThreadManager.h"
 #include "MemoryManager.hpp"
 
 class TestCases {
 private:
 	MemoryManager& memMngr;
+	ThreadManager& threadMngr;
 
 public:
 	TestCases();
 	~TestCases();
 
-	void run();
+	void runSingleThreaded();
+	void runMultiThreaded();
 
 };
 

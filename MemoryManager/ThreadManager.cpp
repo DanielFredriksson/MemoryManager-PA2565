@@ -70,6 +70,11 @@ int ThreadManager::getThreadID(std::thread::id threadID)
 	return -1;
 }
 
+std::vector<std::thread::id> ThreadManager::getThreadIDs()
+{
+	return m_threadIDs;
+}
+
 void ThreadManager::appendJob(std::function<void(void)> func)
 {
 	std::unique_lock<std::mutex> lock(m_mutex);

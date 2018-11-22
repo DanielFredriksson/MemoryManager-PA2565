@@ -11,7 +11,7 @@ class ThreadManager
 {
 private:
 	// The threads doing jobs
-	std::vector<std::thread> m_threads;
+	std::deque<std::thread> m_threads;
 	std::vector<std::thread::id> m_threadIDs;
 
 	std::condition_variable m_cond;
@@ -39,6 +39,7 @@ public:
 
 	void init(unsigned int numThreads = 1);
 	int getThreadID(std::thread::id thread);
+	std::vector<std::thread::id> getThreadIDs();
 	void appendJob(std::function<void(void)> func);
 
 	size_t getNumThreads();
