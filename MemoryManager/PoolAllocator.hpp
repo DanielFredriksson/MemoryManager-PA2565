@@ -23,6 +23,7 @@ private:
 	size_t m_entrySize;
 	unsigned int m_numEntries;
 	unsigned int m_numQuadrants;
+	unsigned int m_entriesPerQuadrant;
 
 	std::shared_mutex m_mtx;
 	std::deque<std::atomic_bool> m_usedQuadrants;
