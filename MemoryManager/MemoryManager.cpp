@@ -124,5 +124,6 @@ void MemoryManager::cleanUp()
 	m_pools.clear();
 	m_pools.resize(0);
 
-	delete m_stack;	
+	delete m_stack;
+	m_stack = nullptr;
 }
