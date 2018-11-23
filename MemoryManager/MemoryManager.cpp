@@ -10,7 +10,6 @@ void* MemoryManager::getMem(unsigned int sizeBytes)
 MemoryManager::MemoryManager()
 {
 	m_stack = nullptr;
-	m_threadsSet = false;
 }
 MemoryManager::~MemoryManager()
 {
@@ -125,5 +124,5 @@ void MemoryManager::cleanUp()
 	m_pools.clear();
 	m_pools.resize(0);
 
-	delete m_stack;
+	delete m_stack;	
 }

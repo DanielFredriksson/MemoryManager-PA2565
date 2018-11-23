@@ -24,7 +24,6 @@ public:
 private:
 	std::vector<PoolAllocator*> m_pools;
 	StackAllocator* m_stack;
-	bool m_threadsSet;
 
 	MemoryUsage m_currMemUsage;
 
