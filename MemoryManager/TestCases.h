@@ -34,6 +34,11 @@ public:
 	void runMultiThreaded();
 	void efficiencyTest();
 	void compareEfficiencySingleThreaded(int capacityExponent, int entrySizeExponent);
+
+	void testCase4();
+	void testCase10();
+	void testCase11();
+
 };
 
 #endif //TEST_CASES

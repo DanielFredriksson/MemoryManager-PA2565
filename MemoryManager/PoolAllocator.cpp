@@ -95,7 +95,8 @@ void* PoolAllocator::allocate()
 {
 	// Individual locks; used to check if a 'unique_lock' is currently in play
 	// NOTE: 'unique_lock' in play = we are currently running 'deallocateAll()'
-	//std::shared_lock<std::shared_mutex> lock(m_mtx); TEEHEEE
+	//std::shared_lock<std::shared_mutex> lock(m_mtx);
+
 	// We're looking for a quadrant that's not being searched (= false)
 	bool expected = false;
 	int currentQuadrant = 0;
@@ -103,7 +104,7 @@ void* PoolAllocator::allocate()
 	int entryReturnNum = -1;
 
 	// Maximum amount of time allowed to try and allocate memory (subject to change)
-	std::chrono::system_clock::time_point sleepTill = std::chrono::system_clock::now() + std::chrono::milliseconds(100);
+	std::chrono::system_clock::time_point maxTime = std::chrono::system_clock::now() + std::chrono::milliseconds(100);
 	
 	while (entryReturnNum == -1)
 	{	
@@ -115,7 +116,7 @@ void* PoolAllocator::allocate()
 				|| m_quadFreeAddress.at(currentQuadrant) == nullptr)
 		{
 			// Throws if too much time have been taken during allocation
-			if (std::chrono::system_clock::now() > sleepTill)
+			if (std::chrono::system_clock::now() > maxTime)
 				throw std::exception("All quadrants were full or in use for too long, initialize with more memory.");
 			
 			

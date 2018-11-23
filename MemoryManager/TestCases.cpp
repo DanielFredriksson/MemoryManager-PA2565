@@ -106,6 +106,7 @@ void TestCases::anotherTest()
 	/*std::thread t1(func);
 	std::thread t2(func);*/
 }
+
 void TestCases::cleanMemoryManager() {
 	memMngr.cleanUp();
 	
@@ -115,6 +116,7 @@ void TestCases::cleanMemoryManager() {
 	pi.push_back(MemoryManager::PoolInstance{ 128, 8000, 4 });
 	memMngr.init(1024, pi);
 }
+
 void TestCases::testCase2()
 {
 	/// Fetch memorymanager and clean it from earlier shit.
@@ -263,6 +265,61 @@ void TestCases::compareEfficiencySingleThreaded(int capacityExponent, int entryS
 	std::cout << "Ours was worse by the ratio: " << scale << std::endl;
 	std::cout << std::endl << std::endl;
 }
+
+void TestCases::testCase4() 
+{
+	auto testFunc = []() {
+		MemoryManager& memMgr = MemoryManager::getInstance();
+		std::vector<MemoryManager::PoolInstance> pi;
+
+		memMgr.cleanUp();
+
+		unsigned int size = 512;
+		pi.push_back(MemoryManager::PoolInstance{ size, 8000, 4 });
+		//pi.push_back(MemoryManager::PoolInstance{ 8 * 2, 12, 4 });
+		//pi.push_back(MemoryManager::PoolInstance{ 8 * 3, 12, 4 });
+
+		memMgr.init(1024, pi);
+
+		auto start = std::chrono::system_clock::now();
+		for (int i = 0; i < 8000; i++) {
+			void* ptr = memMgr.randomAllocate(size);
+		}
+		auto end = std::chrono::system_clock::now();
+		std::cout << "Ours took: \n" << (end - start).count() << std::endl;
+
+
+		start = std::chrono::system_clock::now();
+		for (int i = 0; i < 8000; i++)
+			auto ptr8 = malloc(size);
+		end = std::chrono::system_clock::now();
+		std::cout << "Malloc took: \n" << (end - start).count() << std::endl;
+	};
+	std::thread t1(testFunc);
+
+	t1.join();
+}
+
+void TestCases::testCase10()
+{
+	// Setup the memory manager
+	cleanMemoryManager();
+	
+
+
+
+	// Output
+	/*std::cout << "Capacity: " << byteCapacity << ". EntrySize: " << poolEntryByteSize << std::endl;
+	std::cout << "Memorymanager took: " << differenceOurs.count() << " nanoseconds" << std::endl;
+	std::cout << "New took: " << differenceNew.count() << " nanoseconds" << std::endl;
+	std::cout << "Ours was better by: " << difference.count() << " nanoseconds" << std::endl;
+	std::cout << std::endl << std::endl;*/
+}
+
+void TestCases::testCase11()
+{
+}
+
 
 
 // ------------------- OUTCOMMENTED OLD SHIT -------------------
