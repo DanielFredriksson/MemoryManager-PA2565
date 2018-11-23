@@ -24,6 +24,9 @@ public:
 	void someTest();
 	void anotherTest();
 
+	void cleanMemoryManager();
+
+
 	void runSingleThreaded();
 	void runMultiThreaded();
 	void efficiencyTest();
