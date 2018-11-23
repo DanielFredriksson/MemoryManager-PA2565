@@ -129,6 +129,11 @@ void TestCases::anotherTest()
 	std::thread t2(func);*/
 }
 
+void TestCases::testCase2()
+{
+
+}
+
 void TestCases::runSingleThreaded()
 {
 	/*

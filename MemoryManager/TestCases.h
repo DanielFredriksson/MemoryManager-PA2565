@@ -24,6 +24,8 @@ public:
 	void someTest();
 	void anotherTest();
 
+	void testCase2();
+
 	void runSingleThreaded();
 	void runMultiThreaded();
 	void efficiencyTest();
