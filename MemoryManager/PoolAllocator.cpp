@@ -10,10 +10,6 @@ int PoolAllocator::findFreeEntry(int quadrant)
 	int returnValue;
 
 	void* allocationAddress = m_quadFreeAddress.at(quadrant);
-	// If true = quadrent is already fully allocated!
-	// EARLY EXIT (-1)
-	if (allocationAddress == nullptr)
-		return -1;
 
 	char* tempAddress;
 	// Address of pool's start
@@ -32,13 +28,15 @@ int PoolAllocator::findFreeEntry(int quadrant)
 
 	void* startAddress = static_cast<void*>(tempAddress);
 	void* stopAddress = static_cast<void*>(tempAddress + static_cast<int>(static_cast<float>(m_sizeBytes) / static_cast<float>(m_numQuadrants)));
+
+	unsigned int startEntry = quadrant * m_entriesPerQuadrant;
+	unsigned int entryNumOffset = entryNum - startEntry;
 	// We are looking for the next free entry
-	while (m_entries.at(entryNum) == true && m_quadFreeAddress.at(quadrant) != nullptr)
+	while (m_entries.at(startEntry + entryNumOffset) == true && m_quadFreeAddress.at(quadrant) != nullptr)
 	{
 		tempAddress += m_entrySize;
-		entryNum++;
-		if (entryNum >= (quadrant + 1) * m_entriesPerQuadrant)
-			entryNum = quadrant * m_entriesPerQuadrant;
+		entryNumOffset++;
+		entryNumOffset %= m_entriesPerQuadrant;
 
 		// If reached quadrant end...
 		if (tempAddress >= stopAddress)
@@ -97,7 +95,7 @@ void* PoolAllocator::allocate()
 {
 	// Individual locks; used to check if a 'unique_lock' is currently in play
 	// NOTE: 'unique_lock' in play = we are currently running 'deallocateAll()'
-	std::shared_lock<std::shared_mutex> lock(m_mtx);
+	//std::shared_lock<std::shared_mutex> lock(m_mtx); TEEHEEE
 	// We're looking for a quadrant that's not being searched (= false)
 	bool expected = false;
 	int currentQuadrant = 0;

@@ -45,6 +45,7 @@ void MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEnt
 			// If found a pool with larger entries, insert the new pool before the larger pool
 			m_pools.insert(it, temp);
 			largerFound = true;
+			return;
 		}
 	}
 	if (!largerFound) {
