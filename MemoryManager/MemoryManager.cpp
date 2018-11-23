@@ -1,5 +1,7 @@
 #include "MemoryManager.hpp"
 
+#include <string>
+
 void* MemoryManager::getMem(unsigned int sizeBytes)
 {
 	return calloc(1, sizeBytes);
@@ -22,6 +24,9 @@ void MemoryManager::init(unsigned int stackSizeBytes, std::vector<PoolInstance> 
 
 	int currIndex = 0;
 	for (PoolInstance PI : poolInstances) {
+		if (PI.numEntries % PI.numQuadrants != 0)
+			throw std::exception(("The number of entries in PoolInstance " + std::to_string(currIndex) + " was not divisible with the number of quadrants.").c_str());
+
 		addPool(PI.sizeBytesEachEntry, PI.numEntries, PI.numQuadrants);
 		m_currMemUsage.pools.push_back(m_pools.at(currIndex++)->getUsedMemory());
 	}

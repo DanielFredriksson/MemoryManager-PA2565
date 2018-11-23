@@ -33,10 +33,12 @@ int PoolAllocator::findFreeEntry(int quadrant)
 	void* startAddress = static_cast<void*>(tempAddress);
 	void* stopAddress = static_cast<void*>(tempAddress + static_cast<int>(static_cast<float>(m_sizeBytes) / static_cast<float>(m_numQuadrants)));
 	// We are looking for the next free entry
-	while (m_entries.at(entryNum) == true && entryNum < (m_numEntries/m_numQuadrants))
+	while (m_entries.at(entryNum) == true && m_quadFreeAddress.at(quadrant) != nullptr)
 	{
 		tempAddress += m_entrySize;
 		entryNum++;
+		if (entryNum >= (quadrant + 1) * m_entriesPerQuadrant)
+			entryNum = quadrant * m_entriesPerQuadrant;
 
 		// If reached quadrant end...
 		if (tempAddress >= stopAddress)
@@ -68,6 +70,7 @@ PoolAllocator::PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int 
 	m_entrySize = entrySize;
 	m_numEntries = numEntries;
 	m_numQuadrants = numQuadrants;
+	m_entriesPerQuadrant = numEntries / numQuadrants;
 
 	for (unsigned int i = 0; i < numEntries; i++)
 		m_entries.emplace_back(false);
@@ -101,15 +104,30 @@ void* PoolAllocator::allocate()
 	// A returnValue of '-1' means the quadrant if completely full
 	int entryReturnNum = -1;
 
+	// Maximum amount of time allowed to try and allocate memory (subject to change)
+	std::chrono::system_clock::time_point sleepTill = std::chrono::system_clock::now() + std::chrono::milliseconds(100);
+	
 	while (entryReturnNum == -1)
-	{	// If the quadrant's 'm_usedQuadrants' == true, that means another thread is
+	{	
+		// If the quadrant's 'm_usedQuadrants' == true, that means another thread is
 		// searching in that quadrant already. So we look through the next
 		// quadrant in the hopes that it's not being searched through.
-		while (!m_usedQuadrants.at(currentQuadrant).compare_exchange_strong(expected, true))
+		// also checks whether or not the quadrant has a free address
+		while (!m_usedQuadrants.at(currentQuadrant).compare_exchange_strong(expected, true)
+				|| m_quadFreeAddress.at(currentQuadrant) == nullptr)
 		{
+			// Throws if too much time have been taken during allocation
+			if (std::chrono::system_clock::now() > sleepTill)
+				throw std::exception("All quadrants were full or in use for too long, initialize with more memory.");
+			
+			
+			// expected == true
+			// at == true
+			m_usedQuadrants.at(currentQuadrant).compare_exchange_strong(expected, false);
+			expected = false;
+
 			currentQuadrant++;
-			if (currentQuadrant >= m_numQuadrants)
-				currentQuadrant = 0;
+			currentQuadrant %= m_numQuadrants;
 		}
 
 		entryReturnNum = findFreeEntry(currentQuadrant);
