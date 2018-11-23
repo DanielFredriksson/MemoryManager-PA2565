@@ -162,8 +162,6 @@ void TestCases::testCase2()
 	}
 }
 
-
-}
 void TestCases::testPointerSafetySingle() {
 	// test ID# 1
 	std::cout << "ID# 1 : Single-threaded Allocation - Pointer Safety";
