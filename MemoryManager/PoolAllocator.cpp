@@ -31,15 +31,15 @@ int PoolAllocator::findFreeEntry(int quadrant)
 	tempAddress = static_cast<char*>(m_quadFreeAddress.at(quadrant));
 
 	void* startAddress = static_cast<void*>(tempAddress);
-	void* stopAddress = static_cast<void*>(tempAddress += static_cast<int>(static_cast<float>(m_sizeBytes) / static_cast<float>(m_numQuadrants)));
+	void* stopAddress = static_cast<void*>(tempAddress + static_cast<int>(static_cast<float>(m_sizeBytes) / static_cast<float>(m_numQuadrants)));
 	// We are looking for the next free entry
-	while (m_entries.at(entryNum) == true && entryNum < m_numEntries - 1)
+	while (m_entries.at(entryNum) == true && entryNum < (m_numEntries/m_numQuadrants))
 	{
 		tempAddress += m_entrySize;
 		entryNum++;
 
 		// If reached quadrant end...
-		if (tempAddress == stopAddress)
+		if (tempAddress >= stopAddress)
 			// ... search from quadrant start
 			tempAddress = static_cast<char*>(startAddress);
 		// If reaching where we started = quadrant is completely full!
@@ -47,6 +47,9 @@ int PoolAllocator::findFreeEntry(int quadrant)
 		{	// '== nullptr' means that the memory is full.
 			m_quadFreeAddress.at(quadrant) = nullptr;
 		}
+	}
+	if (m_quadFreeAddress.at(quadrant) != nullptr && m_entries.at(entryNum) == false) {
+		m_quadFreeAddress.at(quadrant) = tempAddress;
 	}
 	// 'returnValue' = 'entryNum'
 	return returnValue;
