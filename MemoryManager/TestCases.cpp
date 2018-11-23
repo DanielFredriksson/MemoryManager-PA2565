@@ -106,7 +106,6 @@ void TestCases::anotherTest()
 	/*std::thread t1(func);
 	std::thread t2(func);*/
 }
-
 void TestCases::cleanMemoryManager() {
 	memMngr.cleanUp();
 	
@@ -114,8 +113,56 @@ void TestCases::cleanMemoryManager() {
 	pi.push_back(MemoryManager::PoolInstance{ 512, 8000, 4 });
 	pi.push_back(MemoryManager::PoolInstance{ 256, 8000, 4 });
 	pi.push_back(MemoryManager::PoolInstance{ 128, 8000, 4 });
-
 	memMngr.init(1024, pi);
+}
+void TestCases::testCase2()
+{
+	/// Fetch memorymanager and clean it from earlier shit.
+	this->memMngr.cleanUp();
+	/// Determine Stacks and pools with the same capacity
+	// Stack
+	unsigned int byteCapacity = 32;
+	// Pool
+	unsigned int poolEntryByteSize = 8;
+	unsigned int numEntries = byteCapacity / poolEntryByteSize;
+	unsigned int numQuadrants = 4;
+	std::vector<MemoryManager::PoolInstance> pools;
+	MemoryManager::PoolInstance pool = {
+		poolEntryByteSize,
+		numEntries,
+		numQuadrants
+	};
+	pools.push_back(pool);
+	// Initiate memorymanager with stack and pool
+	memMngr.init(byteCapacity, pools);
+
+	std::cout << "TEST: Single-threaded Allocation - Overflow handling" << std::endl;
+	std::cout << "DESCRIPTION: Trying to allocate more memory than is available should throw an exception" << std::endl << std::endl;
+
+	/// START
+	// Allocate more memory than is available in the stack
+	try {
+		std::cout << "Attempting to overflow the stack..." << std::endl;
+		while (true) {
+			this->memMngr.singleFrameAllocate(8);
+		}
+	}
+	catch (std::exception &e) {
+		std::cout << "Error caught! [ " << e.what() << " ]" << std::endl;
+	}
+	// Allocate more memory than is available in the stack
+	try {
+		std::cout << "Attempting to overflow the pool..." << std::endl;
+		while (true) {
+			this->memMngr.randomAllocate(8);
+		}
+	}
+	catch (std::exception &e) {
+		std::cout << "Error caught! [ " << e.what() << " ]" << std::endl << std::endl;
+	}
+}
+
+
 }
 void TestCases::testPointerSafetySingle() {
 	// test ID# 1
