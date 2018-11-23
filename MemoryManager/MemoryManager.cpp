@@ -124,12 +124,6 @@ void MemoryManager::cleanUp()
 	m_pools.clear();
 	m_pools.resize(0);
 
-	// Clean stack as well
-	if (m_stack != nullptr) {
-		m_stack->deallocateAll();
-		m_stack = nullptr;
-	}
-
-
 	delete m_stack;
+	m_stack = nullptr;
 }

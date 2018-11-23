@@ -34,8 +34,6 @@ private:
 	MemoryManager(MemoryManager const&) = delete;
 	void operator=(MemoryManager const&) = delete;
 
-	std::vector<std::thread::id> m_threadIDs;
-
 private:
 	void addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries, unsigned int numQuadrants);
 	void addStack(unsigned int sizeBytes);
