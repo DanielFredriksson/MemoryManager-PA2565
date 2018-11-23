@@ -22,6 +22,7 @@ public:
 	~TestCases();
 
 	void someTest();
+	void anotherTest();
 
 	void runSingleThreaded();
 	void runMultiThreaded();
