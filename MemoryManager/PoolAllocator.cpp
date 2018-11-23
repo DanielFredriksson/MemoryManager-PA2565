@@ -48,7 +48,7 @@ int PoolAllocator::findFreeEntry(int quadrant)
 			m_quadFreeAddress.at(quadrant) = nullptr;
 		}
 	}
-	if (m_quadFreeAddress.at(quadrant) != nullptr && m_entries.at(entryNum) == false) {
+	if (m_quadFreeAddress.at(quadrant) != nullptr && m_entries.at(startEntry + entryNumOffset) == false) {
 		m_quadFreeAddress.at(quadrant) = tempAddress;
 	}
 	// 'returnValue' = 'entryNum'

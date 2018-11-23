@@ -117,7 +117,47 @@ void TestCases::cleanMemoryManager() {
 
 	memMngr.init(1024, pi);
 }
+void TestCases::testPointerSafetySingle() {
+	// test ID# 1
+	std::cout << "ID# 1 : Single-threaded Allocation - Pointer Safety";
+	std::cout << "\n\nPool Allocation:\n";
+	cleanMemoryManager();
+	bool failed = false;
+	void *ptr1 = nullptr;
+	void *ptr2 = nullptr;
 
+	for (unsigned int i = 0; i < 2000; i++) {
+		ptr1 = memMngr.randomAllocate(100);
+		if (ptr2 == ptr1) {
+			std::cout << "Pool Allocation failed! Allocating to same memory!\n";
+			failed = true;
+		}
+		else
+			ptr2 = ptr1;
+	}
+
+	if (!failed) {
+		std::cout << "Successful.\n";
+	}
+
+	std::cout << "\n\nStack Allocation:\n";
+
+	ptr1 = nullptr;
+	ptr2 = ptr1;
+	for (unsigned int i = 0; i < 100; i++) {
+		ptr1 = memMngr.singleFrameAllocate(8);
+		if (ptr2 == ptr1) {
+			std::cout << "Stack Allocation failed! Allocating to same memory!\n";
+			failed = true;
+		}
+		else
+			ptr2 = ptr1;
+	}
+	if (!failed) {
+		std::cout << "Successful.\n";
+	}
+
+}
 
 void TestCases::compareEfficiencySingleThreaded(int capacityExponent, int entrySizeExponent)
 {

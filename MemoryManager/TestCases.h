@@ -26,7 +26,7 @@ public:
 
 	void cleanMemoryManager();
 
-
+	void testPointerSafetySingle();
 	void runSingleThreaded();
 	void runMultiThreaded();
 	void efficiencyTest();
