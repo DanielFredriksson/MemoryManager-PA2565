@@ -17,8 +17,6 @@ int PoolAllocator::findFreeEntry(int quadrant)
 	// Set that entry to 'allocated'
 	m_entries.at(entryNum) = true;
 
-	int bytesPerQuadrant = m_sizeBytes / m_numQuadrants;
-
 	unsigned int startEntry = quadrant * m_entriesPerQuadrant;
 	unsigned int entryNumOffset = entryNum - startEntry;
 
