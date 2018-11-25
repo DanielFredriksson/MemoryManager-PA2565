@@ -20,16 +20,17 @@ void TestCases::anotherTest()
 		MemoryManager& memMgr = MemoryManager::getInstance();
 		std::vector<MemoryManager::PoolInstance> pi;
 
-
-		unsigned int size = 512;
-		pi.push_back(MemoryManager::PoolInstance{ size, 8000, 4 });
+		unsigned int size = 2048;
+		unsigned int numAssignments = 8000;
+		std::cout << "Number of allocation (" << numAssignments << ")  Size of each allocation (" << size << ")" << std::endl;
+		pi.push_back(MemoryManager::PoolInstance{ size, numAssignments, 4 });
 		//pi.push_back(MemoryManager::PoolInstance{ 8 * 2, 12, 4 });
 		//pi.push_back(MemoryManager::PoolInstance{ 8 * 3, 12, 4 });
 
 		memMgr.init(1024, pi);
 
 		auto start = std::chrono::system_clock::now();
-		for (int i = 0; i < 8000; i++) {
+		for (int i = 0; i < numAssignments; i++) {
 			void* ptr = memMgr.randomAllocate(size);
 		}
 		auto end = std::chrono::system_clock::now();
@@ -37,7 +38,7 @@ void TestCases::anotherTest()
 
 
 		start = std::chrono::system_clock::now();
-		for (int i = 0; i < 8000; i++)
+		for (int i = 0; i < numAssignments; i++)
 			auto ptr8 = malloc(size);
 		end = std::chrono::system_clock::now();
 		std::cout << "Malloc took: \n" << (end - start).count() << std::endl;

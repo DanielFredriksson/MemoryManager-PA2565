@@ -11,46 +11,29 @@ int PoolAllocator::findFreeEntry(int quadrant)
 
 	void* allocationAddress = m_quadFreeAddress.at(quadrant);
 
-	char* tempAddress;
-	// Address of pool's start
-	/*tempAddress = static_cast<char*>(m_memPtr);
-	// Address of quadrent's start
-	tempAddress += static_cast<int>(static_cast<float>(quadrant) * static_cast<float>(m_sizeBytes) / float(m_numQuadrants)));
-	// Which specific pool entry we are looking at
-	int entryNum = static_cast<int>((static_cast<char*>(allocationAddress) - static_cast<char*>(m_memPtr)) / sizeof(char));*/
 	unsigned int entryNum = static_cast<char*>(allocationAddress) - static_cast<char*>(m_memPtr);
-	entryNum = static_cast<int>(static_cast<float>(entryNum) / static_cast<float>(m_entrySize));
+	entryNum = entryNum / m_entrySize;
 	returnValue = entryNum;
 	// Set that entry to 'allocated'
 	m_entries.at(entryNum) = true;
 
-	tempAddress = static_cast<char*>(m_quadFreeAddress.at(quadrant));
-
-	void* startAddress = static_cast<void*>(tempAddress);
-	void* stopAddress = static_cast<void*>(tempAddress + static_cast<int>(static_cast<float>(m_sizeBytes) / static_cast<float>(m_numQuadrants)));
+	int bytesPerQuadrant = m_sizeBytes / m_numQuadrants;
 
 	unsigned int startEntry = quadrant * m_entriesPerQuadrant;
 	unsigned int entryNumOffset = entryNum - startEntry;
+
+	m_quadFreeAddress.at(quadrant) = nullptr;
 	// We are looking for the next free entry
-	while (m_entries.at(startEntry + entryNumOffset) == true && m_quadFreeAddress.at(quadrant) != nullptr)
-	{
-		tempAddress += m_entrySize;
+	for (int i = 0; i < m_entriesPerQuadrant; i++) {
 		entryNumOffset++;
 		entryNumOffset %= m_entriesPerQuadrant;
-
-		// If reached quadrant end...
-		if (tempAddress >= stopAddress)
-			// ... search from quadrant start
-			tempAddress = static_cast<char*>(startAddress);
-		// If reaching where we started = quadrant is completely full!
-		if (tempAddress == allocationAddress)
-		{	// '== nullptr' means that the memory is full.
-			m_quadFreeAddress.at(quadrant) = nullptr;
+		
+		if (!m_entries.at(startEntry + entryNumOffset)) {
+			m_quadFreeAddress.at(quadrant) = static_cast<char*>(m_memPtr) + (entryNumOffset + startEntry) * m_entrySize;
+			break;
 		}
 	}
-	if (m_quadFreeAddress.at(quadrant) != nullptr && m_entries.at(startEntry + entryNumOffset) == false) {
-		m_quadFreeAddress.at(quadrant) = tempAddress;
-	}
+	
 	// 'returnValue' = 'entryNum'
 	return returnValue;
 }
@@ -103,10 +86,10 @@ void* PoolAllocator::allocate()
 	int entryReturnNum = -1;
 
 	// Maximum amount of time allowed to try and allocate memory (subject to change)
-	std::chrono::system_clock::time_point sleepTill = std::chrono::system_clock::now() + std::chrono::milliseconds(100);
+	//std::chrono::system_clock::time_point sleepTill = std::chrono::system_clock::now() + std::chrono::milliseconds(100);
 	
 	while (entryReturnNum == -1)
-	{	
+	{
 		// If the quadrant's 'm_usedQuadrants' == true, that means another thread is
 		// searching in that quadrant already. So we look through the next
 		// quadrant in the hopes that it's not being searched through.
@@ -114,14 +97,16 @@ void* PoolAllocator::allocate()
 		while (!m_usedQuadrants.at(currentQuadrant).compare_exchange_strong(expected, true)
 				|| m_quadFreeAddress.at(currentQuadrant) == nullptr)
 		{
+
+			// OPTI -- EATS A LOT OF CPU TIME
 			// Throws if too much time have been taken during allocation
-			if (std::chrono::system_clock::now() > sleepTill)
-				throw std::exception("All quadrants were full or in use for too long, initialize with more memory.");
+			//if (std::chrono::system_clock::now() > sleepTill)
+			//	throw std::exception("All quadrants were full or in use for too long, initialize the pool with more memory.");
 			
 			
 			// expected == true
 			// at == true
-			m_usedQuadrants.at(currentQuadrant).compare_exchange_strong(expected, false);
+			m_usedQuadrants.at(currentQuadrant) = false;
 			expected = false;
 
 			currentQuadrant++;
