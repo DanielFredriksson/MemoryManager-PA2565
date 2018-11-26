@@ -44,7 +44,7 @@ public:
 
 
 	/* IMPORTANT FUNCTIONS */
-	void testCase4(unsigned int sizePerAlloc, unsigned int numAllocs);
+	void testCase4(unsigned int sizePerAlloc, unsigned int numAlloc, unsigned int numIter);
 
 	void testCase13();
 

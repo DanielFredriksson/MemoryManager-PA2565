@@ -399,9 +399,13 @@ void TestCases::compareEfficiencySingleThreaded(int capacityExponent, int entryS
 	std::cout << std::endl << std::endl;
 }
 
-void TestCases::testCase4(unsigned int sizePerAlloc, unsigned int numAllocs) 
+void TestCases::testCase4(unsigned int sizePerAlloc, unsigned int numAllocs, unsigned int numIter) 
 {
-	auto testFunc = [&sizePerAlloc, &numAllocs]() {
+	double averages[3];
+	averages[0] = 0;
+	averages[1] = 0;
+	averages[2] = 0;
+ 	auto testFunc = [&sizePerAlloc, &numAllocs, &averages]() {
 		MemoryManager& memMgr = MemoryManager::getInstance();
 		std::vector<MemoryManager::PoolInstance> pi;
 
@@ -413,35 +417,47 @@ void TestCases::testCase4(unsigned int sizePerAlloc, unsigned int numAllocs)
 
 		memMgr.init(size * numAllocations, pi);
 
-		std::cout << "Size of each allocation [" << size << " bytes]. Number of allocations [" << numAllocations << "]." << std::endl;
-
+		// Pool allocation
 		auto start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < numAllocations; i++) {
 			void* ptr = memMgr.randomAllocate(size);
 		}
 		auto end = std::chrono::high_resolution_clock::now();
 		auto timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-		std::cout << "Our pool allocation took: \t" << timeSpan.count() << " seconds." << std::endl;
+		averages[0] += timeSpan.count();
 
+		// Stack allocation
 		start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < numAllocations; i++) {
 			void* ptr = memMgr.singleFrameAllocate(size);
 		}
 		end = std::chrono::high_resolution_clock::now();
 		timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-		std::cout << "Our stack allocation took: \t" << timeSpan.count() << " seconds." << std::endl;
+		averages[1] += timeSpan.count();
 
-
+		// Malloc
 		start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < numAllocations; i++)
 			void* ptr = malloc(size);
 		end = std::chrono::high_resolution_clock::now();
 		timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-		std::cout << "Native malloc took: \t\t" << timeSpan.count() << " seconds." << std::endl;
+		averages[2] += timeSpan.count();
 	};
-	std::thread t1(testFunc);
 
-	t1.join();
+	for (int i = 0; i < numIter; i++) {
+		std::thread t1(testFunc);
+
+		t1.join();
+	}
+
+	for(unsigned int i = 0; i < 3; i++)
+		averages[i] /= static_cast<double>(numIter);
+
+	std::cout << "Size of each allocation [" << sizePerAlloc << " bytes]. Number of allocations [" << numAllocs << "]. Number of iterations: "  << numIter << "." << std::endl;
+	std::cout << "Our pool allocation took on average: \t" << averages[0] << " seconds." << std::endl;
+	std::cout << "Our stack allocation took on average: \t" << averages[1] << " seconds." << std::endl;
+	std::cout << "Native malloc took on average: \t\t" << averages[2] << " seconds." << std::endl;
+
 }
 
 void TestCases::testCase10()
