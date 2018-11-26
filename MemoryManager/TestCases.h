@@ -35,9 +35,11 @@ public:
 	void efficiencyTest();
 	void compareEfficiencySingleThreaded(int capacityExponent, int entrySizeExponent);
 
-	void testCase4();
+	void testCase4(unsigned int sizePerAlloc, unsigned int numAllocs);
 	void testCase10();
 	void testCase11();
+
+	void poolAllocDealloc();
 
 };
 
