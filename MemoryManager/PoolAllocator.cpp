@@ -173,6 +173,17 @@ std::vector<bool> PoolAllocator::getUsedMemory()
 	return usedMemory;
 }
 
+int PoolAllocator::getFreeEntriesCount()
+{
+	int returnValue = 0;
+
+	for (unsigned int i = 0; i < m_entries.size(); i++)
+		if (m_entries.at(i) == false)
+			returnValue++;
+
+	return returnValue;
+}
+
 unsigned int PoolAllocator::getEntrySize() const{
 	return static_cast<unsigned int>(m_entrySize);
 }

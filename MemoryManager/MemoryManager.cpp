@@ -113,6 +113,16 @@ void MemoryManager::deallocateStack() {
 	m_stack->deallocateAll();
 }
 
+PoolAllocator* MemoryManager::getSpecificPool(int poolNum)
+{
+	return m_pools.at(poolNum);
+}
+
+StackAllocator* MemoryManager::getStack()
+{
+	return m_stack;
+}
+
 void MemoryManager::cleanUp()
 {
 	size_t loopCount;

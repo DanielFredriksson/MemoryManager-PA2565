@@ -61,6 +61,9 @@ public:
 	void updateAllocatedSpace();
 	MemoryUsage& getAllocatedSpace();
 
+	PoolAllocator* getSpecificPool(int poolNum);
+	StackAllocator* getStack();
+
 	void cleanUp();
 };
 

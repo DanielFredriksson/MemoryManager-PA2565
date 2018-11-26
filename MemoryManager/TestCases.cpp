@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <string>
+#include <stdexcept>
 
 #include <future> // used to 'get' results from threads
 
@@ -167,10 +168,125 @@ void TestCases::testCase2()
 	}
 }
 
+void TestCases::testCase3()
+{
+	std::cout << "\n\n\n\n";
+	std::cout << "TEST: Single-threaded Deallocation - Reallocation" << "\n";
+	std::cout << "DESCRIPTION: Using a single thread, it should be possible to allocate to memory that has previously been deallocated." << "\n\n";
+
+	// Clean up the memory manager from any previous test
+	this->memMngr.cleanUp();
+	std::cout << "Initializing test: The MEMORY MANAGER has now been cleaned in case of any lingering data." << "\n";
+	std::cout << "Press 'ENTER' to start. NOTE: For each step, CONTINUE by pressing 'ENTER'";
+	std::getchar();
+	std::cout << "\n\n";
+
+	/// STACK (INIT) ----------------
+	unsigned int stackEntryCount = 5;
+	unsigned int stackSize = 8 * stackEntryCount;
+	unsigned int stackEntrySize = 8;
+	// ------------------------------
+
+	/// POOL (INIT) ----------------------
+	unsigned int poolEntrySize = 8;
+	unsigned int poolEntryCount = 8;
+	std::vector<void*> poolEntryAddresses;
+	unsigned int poolQuadrantCount = 1;
+	// -----------------------------------
+
+	// Setting up our 'poolsList' and our single pool b4 adding it to the memMngr
+	std::vector<MemoryManager::PoolInstance> poolsList;
+	MemoryManager::PoolInstance testPool = {
+		poolEntrySize,
+		poolEntryCount,
+		poolQuadrantCount
+	};
+	poolsList.push_back(testPool);
+	// Initiate a single stack and our single pool
+	memMngr.init(stackSize, poolsList);
+
+	// Resizing our list of POOL ADDRESSES
+	poolEntryAddresses.resize(poolEntryCount);
+
+	std::cout << "1. A stack (entrySize: " << stackEntrySize << " bytes, totalSize: " << stackEntrySize << " * " << stackEntryCount << ") and a pool (entrySize: " << poolEntrySize << " bytes, total size: " << poolEntryCount << ") have been initialized." << "\n";
+	std::getchar();
+	std::cout << "\n\n";
+
+	/// STACK (TEST) -------------------------------------------------------------
+	std::cout << "2. Testing stack ALLOCATION followed by COMPLETE DEALLOCATION:";
+	std::getchar();
+	std::cout << "\n";
+
+	memMngr.singleFrameAllocate(stackEntrySize);
+	memMngr.deallocateStack();
+	std::cout << "\t" << "Action: Single-entry allocation followed by deallocation: SUCCESS";
+	std::getchar();
+	std::cout << "\n";
+
+	for (int i = 0; i < stackEntryCount; i++)
+		memMngr.singleFrameAllocate(stackEntrySize);
+
+	// ERROR CHECKING; POSSIBLE THROW
+	if (memMngr.getStack()->getUsedBytesCount() != (stackEntrySize * stackEntryCount))
+		throw "ERROR: 5 allocations EXACTLY on the stack expected, but NOT FOUND!";
+
+	memMngr.deallocateStack();
+	
+	// ERROR CHECKING; POSSIBLE THROW
+	if (memMngr.getStack()->getUsedBytesCount() != 0)
+		throw "ERROR: 0 allocations on the stack expected, but SOMETHING FOUND!";
+
+	std::cout << "\t" << "Action: Multiple-entry (count = 5) allocation followed by deallocation: SUCCESS";
+	std::getchar();
+	std::cout << "\n\n";
+
+	std::cout << "3. Testing pool ALLOCATION and DEALLOCATION:";
+	std::getchar();
+	std::cout << "\n";
+	// ----------------------------------------------------------------------------------------------------
+
+	/// POOL (TEST) ------------------------------------------------------------------------
+	// Allocate a single pool entry at a time, saving the addresses
+	for (int i = 0; i < poolEntryCount; i++)
+		poolEntryAddresses.at(i) = memMngr.randomAllocate(8);
+	
+	// ERROR CHECKING; POSSIBLE THROW
+	if (memMngr.getSpecificPool(0)->getFreeEntriesCount() != 0)
+		throw "ERROR: Expected the pool to be FULLY ALLOCATED, but it WASN'T!";
+
+	std::cout << "\t" << "Action: Repeatedly allocate until pool is full: SUCCESS";
+	std::getchar();
+	std::cout << "\n";
+
+	for (int i = 0; i < poolEntryCount; i++)
+	{	// Deallocating a single pool entry at a time, using saved addresses
+		memMngr.deallocateSingleRandom(poolEntryAddresses.at(i), poolEntrySize);
+		// Reallocating each address RIGHT after deallocation
+		poolEntryAddresses.at(i) = memMngr.randomAllocate(poolEntrySize);
+	}
+
+	if (memMngr.getSpecificPool(0)->getFreeEntriesCount() != 0)
+		throw "ERROR: Expected the pool to be FULLY ALLOCATED AGAIN, but it WASN'T!";
+
+	std::cout << "\t" << "Action: Deallocate and reallocate each entry, one by one: SUCCESS";
+	std::getchar();
+	std::cout << "\n";
+
+	// Deallocating all entries from our pool
+	memMngr.deallocateAllRandom();
+
+	if (memMngr.getSpecificPool(0)->getFreeEntriesCount() != poolEntryCount)
+		throw "ERROR: Expected the pool to be FULLY DEALLOCATED, but it WASN'T!";
+
+	std::cout << "\t" << "Action: Deallocate ALL pool entries: SUCCESS";
+	std::cout << "\n";
+	// --------------------------------------------------------------------------------------
+}
+
 void TestCases::testCase8()
 {
 	std::cout << "TEST: Multi-threaded Deallocation - Reallocation" << std::endl;
-	std::cout << "DESCRIPTION: It should be possible to reallocate memory that has been deallocated previously." << std::endl << std::endl;
+	std::cout << "DESCRIPTION: Using multi-threading, it should be possible to reallocate memory that has been deallocated previously." << std::endl << std::endl;
 	
 	/// Fetch memorymanager and clean it from earlier shit.
 	this->memMngr.cleanUp();

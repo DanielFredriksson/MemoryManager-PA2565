@@ -33,7 +33,7 @@ public:
 	// Memory tracking for debugging purposes
 	virtual std::vector<bool> getUsedMemory();
 
-
+	int getUsedBytesCount();
 };
 
 #endif //STACK_ALLOCATOR

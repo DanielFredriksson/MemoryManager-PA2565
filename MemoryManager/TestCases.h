@@ -37,7 +37,9 @@ public:
 	void compareEfficiencySingleThreaded(int capacityExponent, int entrySizeExponent);
 
 	void testCase2();
+	void testCase3();
 	void testCase4();
+	void testCase5();
 	void testCase8();
 	void testCase9();
 	void testCase10();

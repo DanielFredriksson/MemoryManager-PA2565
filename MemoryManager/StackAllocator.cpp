@@ -21,6 +21,21 @@ std::vector<bool> StackAllocator::getUsedMemory()
 	return usedMemory;
 }
 
+int StackAllocator::getUsedBytesCount()
+{
+	int returnValue = 0;
+	char* stackBottomPointer = static_cast<char*>(m_memPtr);
+	char* stackTopPointer = (static_cast<char*>(m_memPtr) + m_marker);
+
+	while (stackBottomPointer != stackTopPointer)
+	{
+		returnValue++;
+		stackBottomPointer++;
+	}
+
+	return returnValue;
+}
+
 StackAllocator::StackAllocator(void * memPtr, unsigned int sizeBytes): Allocator(memPtr, padMemory(sizeBytes))
 {
 	m_marker.store(0);
