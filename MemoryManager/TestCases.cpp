@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <string>
+#include <future>
 
 TestCases::TestCases()
 	: memMngr(MemoryManager::getInstance())
@@ -12,7 +13,6 @@ TestCases::TestCases()
 TestCases::~TestCases()
 {
 }
-
 
 void TestCases::anotherTest()
 {
@@ -275,26 +275,34 @@ void TestCases::testCase4()
 
 		memMgr.cleanUp();
 
-		unsigned int size = 512;
-		pi.push_back(MemoryManager::PoolInstance{ size, 8000, 4 });
-		//pi.push_back(MemoryManager::PoolInstance{ 8 * 2, 12, 4 });
-		//pi.push_back(MemoryManager::PoolInstance{ 8 * 3, 12, 4 });
+		unsigned int size = 64;
+		unsigned int numAllocations = 8000;
+		pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, 4 });
 
-		memMgr.init(1024, pi);
+		memMgr.init(size * numAllocations, pi);
+
+		std::cout << "Size of each allocation [" << size << " bytes]. Number of allocations [" << numAllocations << "]." << std::endl;
 
 		auto start = std::chrono::system_clock::now();
-		for (int i = 0; i < 8000; i++) {
+		for (int i = 0; i < numAllocations; i++) {
 			void* ptr = memMgr.randomAllocate(size);
 		}
 		auto end = std::chrono::system_clock::now();
-		std::cout << "Ours took: \n" << (end - start).count() << std::endl;
+		std::cout << "Our pool allocation took: \t" << (end - start).count() << " nanoseconds." << std::endl;
+
+		start = std::chrono::system_clock::now();
+		for (int i = 0; i < numAllocations; i++) {
+			void* ptr = memMgr.singleFrameAllocate(size);
+		}
+		end = std::chrono::system_clock::now();
+		std::cout << "Our stack allocation took: \t" << (end - start).count() << " nanoseconds." << std::endl;
 
 
 		start = std::chrono::system_clock::now();
-		for (int i = 0; i < 8000; i++)
-			auto ptr8 = malloc(size);
+		for (int i = 0; i < numAllocations; i++)
+			void* ptr = malloc(size);
 		end = std::chrono::system_clock::now();
-		std::cout << "Malloc took: \n" << (end - start).count() << std::endl;
+		std::cout << "Native malloc took: \t\t" << (end - start).count() << " nanoseconds." << std::endl;
 	};
 	std::thread t1(testFunc);
 
@@ -303,18 +311,116 @@ void TestCases::testCase4()
 
 void TestCases::testCase10()
 {
-	// Setup the memory manager
-	cleanMemoryManager();
+	auto testFunc = []() {
+		MemoryManager& memMgr = MemoryManager::getInstance();
+		std::vector<MemoryManager::PoolInstance> pi;
+
+		memMgr.cleanUp();
+
+		unsigned int size = 64;
+		unsigned int numAllocations = 8000;
+		pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, 1 });
+
+		memMgr.init(size * numAllocations, pi);
+
+		std::cout << "Size of each allocation [" << size << " bytes]. Number of allocations [" << numAllocations << "]." << std::endl;
+
+		auto start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < numAllocations; i++) {
+			void* ptr = memMgr.randomAllocate(size);
+		}
+		auto end = std::chrono::high_resolution_clock::now();
+		auto time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		std::cout << "[Single-threaded] Our pool allocation took: \t" << time_span.count() << " nanoseconds." << std::endl;
+
+		start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < numAllocations; i++) {
+			void* ptr = memMgr.singleFrameAllocate(size);
+		}
+		end = std::chrono::high_resolution_clock::now();
+		time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		std::cout << "[Single-threaded] Our stack allocation took: \t" << time_span.count() << " seconds." << std::endl;
+		
+	};
+
+	std::thread t1(testFunc);
+
+	t1.join();
+
+	MemoryManager& memMgr = MemoryManager::getInstance();
+	std::vector<MemoryManager::PoolInstance> pi;
+
+	memMgr.cleanUp();
+
+	unsigned int size = 64;
+	unsigned int numAllocations = 8000;
+	unsigned int numThreads = 4U;
+	pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, numThreads });
+
+	memMgr.init(size * numAllocations, pi);
+
+
 	
+	auto poolAlloc = [&size, &numAllocations, &numThreads]() {
+		
+		auto& memMgr = MemoryManager::getInstance();
+		unsigned int allocations = numAllocations / numThreads;
+		
+		auto start = std::chrono::high_resolution_clock::now();
+
+		for (int i = 0; i < allocations; i++)
+			void* ptr = memMgr.randomAllocate(size);
+
+		auto end = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+	};
+
+	auto stackStart = std::chrono::high_resolution_clock::now() + std::chrono::seconds(4);
+	auto stackAlloc = [&size, &numAllocations, &stackStart, &numThreads]() {
+
+		auto& memMgr = MemoryManager::getInstance();
+		unsigned int allocations = numAllocations / numThreads;
+		auto start = std::chrono::high_resolution_clock::now();
+
+		for (int i = 0; i < allocations; i++)
+			void* ptr = memMgr.singleFrameAllocate(size);
+
+		auto end = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+	};
+
+	std::vector<std::future<std::chrono::duration<double>>> threads(numThreads);
+
+	for (int i = 0; i < numThreads; i++) {
+		threads.at(i) = std::async(std::launch::async, poolAlloc);
+	}
+	std::chrono::duration<double> timeElapsed = std::chrono::duration<double>(0.0);
+	for (int i = 0; i < numThreads; i++) {
+		try {
+			timeElapsed += threads.at(i).get();
+		}
+		catch (std::exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+	}
+	auto end = std::chrono::high_resolution_clock::now();
+	std::cout << "[Multi-threaded] Our pool allocation took: \t" << timeElapsed.count() << " seconds." << std::endl;
 
 
+	for (int i = 0; i < numThreads; i++) {
+		threads.at(i) = std::async(std::launch::async, stackAlloc);
+	}
+	timeElapsed = std::chrono::duration<double>(0.0);
+	for (int i = 0; i < numThreads; i++) {
+		try {
+			timeElapsed += threads.at(i).get();
+		}
+		catch (std::exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+	}
+	std::cout << "[Multi-threaded] Our stack allocation took: \t" << timeElapsed.count() << " seconds." << std::endl;
 
-	// Output
-	/*std::cout << "Capacity: " << byteCapacity << ". EntrySize: " << poolEntryByteSize << std::endl;
-	std::cout << "Memorymanager took: " << differenceOurs.count() << " nanoseconds" << std::endl;
-	std::cout << "New took: " << differenceNew.count() << " nanoseconds" << std::endl;
-	std::cout << "Ours was better by: " << difference.count() << " nanoseconds" << std::endl;
-	std::cout << std::endl << std::endl;*/
 }
 
 void TestCases::testCase11()

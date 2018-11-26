@@ -37,13 +37,13 @@ void* StackAllocator::allocate(unsigned int sizeBytes)
 	unsigned int paddedMemory = padMemory(sizeBytes);
 	
 
-	std::lock_guard<std::shared_mutex> lock(m_mtx);
+	//std::lock_guard<std::shared_mutex> lock(m_mtx);
 	//try {
 		if (m_marker + paddedMemory <= m_sizeBytes) {
 			// Get current marker location and move marker to top.
 			Marker currMarker = m_marker.fetch_add(paddedMemory);
 
-			ptr = (char*)m_memPtr + currMarker;
+			ptr = static_cast<char*>(m_memPtr) + currMarker;
 		}
 		else
 			throw std::overflow_error("StackAllocator::allocate : Tried to allocate more memory than was available.");
