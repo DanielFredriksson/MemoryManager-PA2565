@@ -12,23 +12,27 @@
 class PoolAllocator: private Allocator 
 {
 
-private:
+	
+private: /// VARIABLES
 	int findFreeEntry(int quadrant);
-
-private:
+	bool checkIfAllQuadrantsSafe(std::vector<bool> quadrantSafe);
+	
+private: /// FUNCTIONS
 	// Vector can't be used in conjunction with objects that can't be moved/copied
 	// https://stackoverflow.com/questions/37870731/resize-a-stdvectorstdatomic-bool-assigning-true-to-all-atomic-bools
 	std::deque<bool> m_entries;
 
 	size_t m_entrySize;
 	unsigned int m_numEntries;
+	unsigned int m_quadrantSize;
 	unsigned int m_numQuadrants;
 	unsigned int m_entriesPerQuadrant;
 	unsigned int m_startQuadrant;
-
-	std::shared_mutex m_mtx;
+	
+	// Mutex Variables
 	std::deque<std::atomic_bool> m_usedQuadrants;
 
+	// Holds each NEXT FREE ADDRESS for each quadrant
 	std::vector<void*> m_quadFreeAddress;
 
 public:
