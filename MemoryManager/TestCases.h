@@ -26,7 +26,7 @@ public:
 
 	void cleanMemoryManager();
 
-	void testPointerSafetySingle();
+	void testCase1();
 
 	void testCase2();
 
@@ -38,6 +38,7 @@ public:
 	void testCase4();
 	void testCase10();
 	void testCase11();
+	void testCase13();
 
 };
 

@@ -2,6 +2,9 @@
 
 #include <chrono>
 #include <string>
+#include <time.h>
+#include <stdlib.h>
+#include "Defines.h"
 
 TestCases::TestCases()
 	: memMngr(MemoryManager::getInstance())
@@ -165,7 +168,7 @@ void TestCases::testCase2()
 	}
 }
 
-void TestCases::testPointerSafetySingle() {
+void TestCases::testCase1() {
 	// test ID# 1
 	std::cout << "ID# 1 : Single-threaded Allocation - Pointer Safety";
 	std::cout << "\n\nPool Allocation:\n";
@@ -319,6 +322,81 @@ void TestCases::testCase10()
 
 void TestCases::testCase11()
 {
+}
+
+void TestCases::testCase13() {
+	auto allocatedSpaceUpdateFunction = []() {
+		GlutManager& glutMngr = GlutManager::getInstance();
+		MemoryManager& memMngr = MemoryManager::getInstance();
+
+		auto allocatedSpace = memMngr.getAllocatedSpace();
+		std::vector<std::vector<bool>> stacks(1);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+		// Update the vectors of the GUI
+		while (true) {
+			auto allocatedSpace = memMngr.getAllocatedSpace();
+			stacks.at(0) = allocatedSpace.stacks;
+			glutMngr.updateVectors(stacks, allocatedSpace.pools);
+			memMngr.updateAllocatedSpace();
+			//std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		}
+	};
+
+	auto randomStackFrameAllocations = []() {
+		auto& memMngr = MemoryManager::getInstance();
+		auto& glutMngr = GlutManager::getInstance();
+		unsigned int i = 0;
+
+		srand(time(NULL));
+		while (i < 10) {
+			std::cout << "Creating random sized objects and putting on stack" << std::endl;
+
+			unsigned int totStackAllocation = 0;
+			while (totStackAllocation < 800) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+				unsigned int allocation = rand() % 151 + 50;
+				unsigned int buffer = allocation % ARCH_BYTESIZE;
+				totStackAllocation += allocation;
+				if (buffer != 0) {
+					totStackAllocation += (ARCH_BYTESIZE - buffer);
+				}
+
+				//std::cout << totStackAllocation << std::endl;
+				memMngr.singleFrameAllocate(allocation);
+
+
+
+			}
+
+
+			i++;
+			std::cout << "Clearing stack...\n\n";
+			memMngr.deallocateStack();
+			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+			
+
+		}
+	};
+
+	cleanMemoryManager();
+
+	std::cout << "TEST: Assignment Scenario One, Single Frame Allocation" << std::endl;
+
+
+
+
+	std::thread t2(allocatedSpaceUpdateFunction);
+	std::thread t1(randomStackFrameAllocations);
+
+
+
+	glutMngr.EnterMainLoop();
+
+	t2.join();
+	t1.join();
+	std::cout << "Test complete.\n";
+
 }
 
 

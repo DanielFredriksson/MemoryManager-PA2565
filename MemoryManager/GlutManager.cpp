@@ -102,7 +102,7 @@ every X milliseconds.
 void timerEvent(int t)
 {
 	glutPostRedisplay();				// Render the scene one more time.
-	glutTimerFunc(100, timerEvent, 1);	// Call this function in 100ms.
+	glutTimerFunc(10, timerEvent, 1);	// Call this function in 100ms.
 }
 
 void GlutManager::initialize(int argc, char **argv)
