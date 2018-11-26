@@ -39,9 +39,13 @@ public:
 	void testCase2();
 	void testCase8();
 	void testCase9();
-	void testCase4(unsigned int sizePerAlloc, unsigned int numAllocs);
 	void testCase10();
 	void testCase11();
+
+
+	/* IMPORTANT FUNCTIONS */
+	void testCase4(unsigned int sizePerAlloc, unsigned int numAllocs);
+
 	void testCase13();
 
 	void poolAllocDealloc();

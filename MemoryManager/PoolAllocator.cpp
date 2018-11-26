@@ -50,6 +50,7 @@ PoolAllocator::PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int 
 	m_numEntries = numEntries;
 	m_numQuadrants = numQuadrants;
 	m_entriesPerQuadrant = numEntries / numQuadrants;
+	m_startQuadrant = 0;
 
 	for (unsigned int i = 0; i < numEntries; i++)
 		m_entries.emplace_back(false);
@@ -79,7 +80,10 @@ void* PoolAllocator::allocate()
 	//std::shared_lock<std::shared_mutex> lock(m_mtx); TEEHEEE
 	// We're looking for a quadrant that's not being searched (= false)
 	bool expected = false;
-	int currentQuadrant = 0;
+	//int currentQuadrant = std::rand() % 4;
+	m_startQuadrant++;
+	m_startQuadrant %= m_numQuadrants;
+	int currentQuadrant = m_startQuadrant;
 	// A returnValue of '-1' means the quadrant if completely full
 	int entryReturnNum = -1;
 

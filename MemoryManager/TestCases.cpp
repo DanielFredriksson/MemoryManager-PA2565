@@ -561,24 +561,25 @@ void TestCases::testCase11()
 
 void TestCases::poolAllocDealloc()
 {
-	auto testFunc = []() {
+	MemoryManager& memMgr = MemoryManager::getInstance();
+	std::vector<MemoryManager::PoolInstance> pi;
+
+	unsigned int size = 64; // The size of a 4x4 matrix of floats
+	unsigned int numAssignments = ARCH_BYTESIZE * 50;
+	unsigned int maxSizeBytes = size * numAssignments;
+	pi.push_back(MemoryManager::PoolInstance{ size, numAssignments, 4 });
+
+	memMgr.init(ARCH_BYTESIZE, pi);
+
+	auto testFunc = [&numAssignments, &size]() {
 		MemoryManager& memMgr = MemoryManager::getInstance();
-		std::vector<MemoryManager::PoolInstance> pi;
-
-		unsigned int size = 64; // The size of a 4x4 matrix of floats
-		unsigned int numAssignments = ARCH_BYTESIZE * 10;
-		unsigned int maxSizeBytes = size * numAssignments;
-		pi.push_back(MemoryManager::PoolInstance{ size, numAssignments, 4 });
-
-		memMgr.init(ARCH_BYTESIZE, pi);
 
 		srand(time(0));
 		std::vector<void*> pointers;
 		while (true) {
 			try {
-				if (rand() % 10 < 4 || pointers.size() < numAssignments / 2) {
+				if (rand() % 10 < 4 || pointers.size() < numAssignments / 8) {
 					pointers.push_back(memMgr.randomAllocate(size));
-					std::cout << "Added element" << std::endl;
 				}
 				else {
 					if (pointers.size() > 0) {
@@ -586,7 +587,6 @@ void TestCases::poolAllocDealloc()
 						memMgr.deallocateSingleRandom(pointers[index], size);
 						std::swap(pointers[index], pointers.back());
 						pointers.pop_back();
-						std::cout << "Added element" << std::endl;
 					}
 				}
 
@@ -599,6 +599,9 @@ void TestCases::poolAllocDealloc()
 
 	};
 	std::thread t1(testFunc);
+	std::thread t2(testFunc);
+	std::thread t3(testFunc);
+	std::thread t4(testFunc);
 
 	auto allocatedSpaceUpdateFunction = []() {
 		GlutManager& glutMngr = GlutManager::getInstance();
@@ -618,12 +621,15 @@ void TestCases::poolAllocDealloc()
 		}
 	};
 	std::this_thread::sleep_for(std::chrono::seconds(1));
-	std::thread t2(allocatedSpaceUpdateFunction);
+	std::thread t5(allocatedSpaceUpdateFunction);
 	GlutManager& glutMngr = GlutManager::getInstance();
 	glutMngr.EnterMainLoop();
 
 	t1.join();
 	t2.join();
+	t3.join();
+	t4.join();
+	t5.join();
 }
 
 void TestCases::testCase13() {
@@ -656,7 +662,7 @@ void TestCases::testCase13() {
 
 			unsigned int totStackAllocation = 0;
 			while (totStackAllocation < 800) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+				std::this_thread::sleep_for(std::chrono::milliseconds(150));
 				unsigned int allocation = rand() % 151 + 50;
 				unsigned int buffer = allocation % ARCH_BYTESIZE;
 				totStackAllocation += allocation;
@@ -675,7 +681,7 @@ void TestCases::testCase13() {
 			i++;
 			std::cout << "Clearing stack...\n\n";
 			memMngr.deallocateStack();
-			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			
 
 		}
