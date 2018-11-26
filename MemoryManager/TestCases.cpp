@@ -3,6 +3,8 @@
 #include <chrono>
 #include <string>
 
+#include <future> // used to 'get' results from threads
+
 TestCases::TestCases()
 	: memMngr(MemoryManager::getInstance())
 	, glutMngr(GlutManager::getInstance())
@@ -54,7 +56,7 @@ void TestCases::anotherTest()
 		memMgr.init(1024, pi);
 
 		std::chrono::system_clock::time_point sleepTill = std::chrono::system_clock::now() + std::chrono::seconds(2);
-
+		
 		auto func = [&memMgr, &sleepTill]() {
 			std::this_thread::sleep_until(sleepTill);
 			auto ptr = memMgr.randomAllocate(5);
@@ -163,6 +165,132 @@ void TestCases::testCase2()
 	catch (std::exception &e) {
 		std::cout << "Error caught! [ " << e.what() << " ]" << std::endl << std::endl;
 	}
+}
+
+void TestCases::testCase8()
+{
+	std::cout << "TEST: Multi-threaded Deallocation - Reallocation" << std::endl;
+	std::cout << "DESCRIPTION: It should be possible to reallocate memory that has been deallocated previously." << std::endl << std::endl;
+	
+	/// Fetch memorymanager and clean it from earlier shit.
+	this->memMngr.cleanUp();
+	/// Determine Stacks and pools with the same capacity
+	// Stack
+	unsigned int byteCapacity = 8;
+	// Pool
+	unsigned int poolEntryByteSize = 8;
+	unsigned int numEntries = byteCapacity / poolEntryByteSize;
+	unsigned int numQuadrants = 1;
+	std::vector<MemoryManager::PoolInstance> pools;
+	MemoryManager::PoolInstance pool = {
+		poolEntryByteSize,
+		numEntries,
+		numQuadrants
+	};
+	pools.push_back(pool);
+	// Initiate memorymanager with stack and pool
+	memMngr.init(byteCapacity, pools);
+
+	/// Allocate
+	std::cout << "Allocating memory..." << std::endl;
+	MemoryManager& instance = MemoryManager::getInstance();
+	void* adressPointer = instance.randomAllocate(8);
+	std::cout << "Memory has been allocated." << std::endl << std::endl;
+
+	/// Functions
+	// Allocate
+	std::chrono::system_clock::time_point sleepTill;
+	auto allocateFunction = [&sleepTill]() {
+		try {
+			MemoryManager& instance = MemoryManager::getInstance();
+			return instance.randomAllocate(8);
+		} 
+		catch (std::exception &e) {
+			std::cout << "Error caught! [ " << e.what() << std::endl << std::endl;
+		}
+	};
+	// Deallocate
+	auto deallocateFunction = [&sleepTill, &adressPointer]() {
+		try {
+			MemoryManager& instance = MemoryManager::getInstance();
+			instance.deallocateSingleRandom(adressPointer, 8);
+		}
+		catch (std::exception &e) {
+			std::cout << "Error caught! [ " << e.what() << std::endl << std::endl;
+		}
+	};
+
+	sleepTill = std::chrono::system_clock::now() + std::chrono::seconds(2);
+	std::cout << "Attempting to deallocate and allocate simultaneously in: 2 seconds." << std::endl;
+
+	std::thread t1(deallocateFunction);
+	std::thread t2(allocateFunction);
+	std::this_thread::sleep_until(sleepTill + std::chrono::seconds(1));
+	std::cout << "If no error was caught, it was a success!" << std::endl << std::endl;
+
+	t1.join();
+	t2.join();
+}
+
+void TestCases::testCase9()
+{
+	std::cout << "TEST:  Multi-threaded Allocation - No allocation during deallocation." << std::endl;
+	std::cout << "DESCRIPTION:  It shouldn’t be possible to allocate new memory while all the memory is being deallocated." << std::endl << std::endl;
+	/// Fetch memorymanager and clean it from earlier shit.
+	this->memMngr.cleanUp();
+	/// Determine Stacks and pools with the same capacity
+	// Stack
+	unsigned int byteCapacity = 32;
+	// Pool
+	unsigned int poolEntryByteSize = 8;
+	unsigned int numEntries = byteCapacity / poolEntryByteSize;
+	unsigned int numQuadrants = 4;
+	std::vector<MemoryManager::PoolInstance> pools;
+	MemoryManager::PoolInstance pool = {
+		poolEntryByteSize,
+		numEntries,
+		numQuadrants
+	};
+	pools.push_back(pool);
+	// Initiate memorymanager with stack and pool
+	memMngr.init(byteCapacity, pools);
+
+	std::cout << "TEST: Multi-threaded Allocation - Overflow handling" << std::endl;
+	std::cout << "DESCRIPTION: Trying to allocate more memory than is available should throw an exception" << std::endl;
+
+	/// START
+	// Allocate more memory than is available in the stack
+	auto func1 = []() {
+		try {
+			std::cout << "Attempting to overflow the stack..." << std::endl;
+			while (true) {
+				MemoryManager::getInstance().singleFrameAllocate(8);
+			}
+		}
+		catch (std::exception &e) {
+			std::cout << "Error caught! [ " << e.what() << " ]" << std::endl;
+		}
+	};
+	
+	auto func2 = []() {
+		std::cout << "Will be stuck here since attempting to allocate in the pool will just keep looking after memory forever" << std::endl;
+		try {
+			std::cout << "Attempting to overflow the pool..." << std::endl;
+			while (true) {
+				MemoryManager::getInstance().randomAllocate(8);
+			}
+		}
+		catch (std::exception &e) {
+				std::cout << "Error caught! [ " << e.what() << " ]" << std::endl;
+		}
+	};
+
+	std::thread t1(func1);
+	t1.join();
+	std::thread t2(func2);
+	
+	t1.join();
+	t2.join();
 }
 
 void TestCases::testPointerSafetySingle() {

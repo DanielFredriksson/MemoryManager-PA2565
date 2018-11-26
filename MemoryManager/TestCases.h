@@ -28,14 +28,18 @@ public:
 
 	void testPointerSafetySingle();
 
-	void testCase2();
+	
+	
 
 	void runSingleThreaded();
 	void runMultiThreaded();
 	void efficiencyTest();
 	void compareEfficiencySingleThreaded(int capacityExponent, int entrySizeExponent);
 
+	void testCase2();
 	void testCase4();
+	void testCase8();
+	void testCase9();
 	void testCase10();
 	void testCase11();
 
