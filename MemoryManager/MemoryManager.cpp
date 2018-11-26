@@ -70,12 +70,18 @@ void* MemoryManager::singleFrameAllocate(unsigned int sizeBytes) {
 void* MemoryManager::randomAllocate(unsigned int sizeBytes) {
 	void* ptr = nullptr;
 	// Check for an appropriate sized pool
-	for (unsigned int i = 0; i < m_pools.size(); i++) {
+	for (auto it = m_pools.begin(); it != m_pools.end(); ++it) {
+		if (sizeBytes <= (*it)->getEntrySize()) {
+			ptr = (*it)->allocate();
+			break;
+		}
+	}
+	/*for (unsigned int i = 0; i < m_pools.size(); i++) {
 		if (sizeBytes <= m_pools.at(i)->getEntrySize()) {
 			ptr = m_pools.at(i)->allocate();
 			i = m_pools.size();
 		}
-	}
+	}*/
 	if (ptr == nullptr)
 		throw std::exception("MemoryManager::randomAllocate : No pool allocated for size " + sizeBytes);
 

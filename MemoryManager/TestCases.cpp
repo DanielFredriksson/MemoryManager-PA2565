@@ -5,6 +5,8 @@
 #include <time.h>
 #include <stdlib.h>
 #include "Defines.h"
+#include <future>
+#include <random>
 
 #include <future> // used to 'get' results from threads
 
@@ -17,7 +19,6 @@ TestCases::TestCases()
 TestCases::~TestCases()
 {
 }
-
 
 void TestCases::anotherTest()
 {
@@ -398,34 +399,45 @@ void TestCases::compareEfficiencySingleThreaded(int capacityExponent, int entryS
 	std::cout << std::endl << std::endl;
 }
 
-void TestCases::testCase4() 
+void TestCases::testCase4(unsigned int sizePerAlloc, unsigned int numAllocs) 
 {
-	auto testFunc = []() {
+	auto testFunc = [&sizePerAlloc, &numAllocs]() {
 		MemoryManager& memMgr = MemoryManager::getInstance();
 		std::vector<MemoryManager::PoolInstance> pi;
 
 		memMgr.cleanUp();
 
-		unsigned int size = 512;
-		pi.push_back(MemoryManager::PoolInstance{ size, 8000, 4 });
-		//pi.push_back(MemoryManager::PoolInstance{ 8 * 2, 12, 4 });
-		//pi.push_back(MemoryManager::PoolInstance{ 8 * 3, 12, 4 });
+		unsigned int size = sizePerAlloc;
+		unsigned int numAllocations = numAllocs;
+		pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, 4 });
 
-		memMgr.init(1024, pi);
+		memMgr.init(size * numAllocations, pi);
 
-		auto start = std::chrono::system_clock::now();
-		for (int i = 0; i < 8000; i++) {
+		std::cout << "Size of each allocation [" << size << " bytes]. Number of allocations [" << numAllocations << "]." << std::endl;
+
+		auto start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < numAllocations; i++) {
 			void* ptr = memMgr.randomAllocate(size);
 		}
-		auto end = std::chrono::system_clock::now();
-		std::cout << "Ours took: \n" << (end - start).count() << std::endl;
+		auto end = std::chrono::high_resolution_clock::now();
+		auto timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		std::cout << "Our pool allocation took: \t" << timeSpan.count() << " seconds." << std::endl;
+
+		start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < numAllocations; i++) {
+			void* ptr = memMgr.singleFrameAllocate(size);
+		}
+		end = std::chrono::high_resolution_clock::now();
+		timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		std::cout << "Our stack allocation took: \t" << timeSpan.count() << " seconds." << std::endl;
 
 
-		start = std::chrono::system_clock::now();
-		for (int i = 0; i < 8000; i++)
-			auto ptr8 = malloc(size);
-		end = std::chrono::system_clock::now();
-		std::cout << "Malloc took: \n" << (end - start).count() << std::endl;
+		start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < numAllocations; i++)
+			void* ptr = malloc(size);
+		end = std::chrono::high_resolution_clock::now();
+		timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		std::cout << "Native malloc took: \t\t" << timeSpan.count() << " seconds." << std::endl;
 	};
 	std::thread t1(testFunc);
 
@@ -434,22 +446,184 @@ void TestCases::testCase4()
 
 void TestCases::testCase10()
 {
-	// Setup the memory manager
-	cleanMemoryManager();
+	unsigned int size = 64;
+	unsigned int numAllocations = 8000;
+	unsigned int numThreads = 4U;
+	auto testFunc = [&size, &numAllocations, &numThreads]() {
+		MemoryManager& memMgr = MemoryManager::getInstance();
+		std::vector<MemoryManager::PoolInstance> pi;
+
+		memMgr.cleanUp();
+
+		pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, numThreads });
+
+		memMgr.init(size * numAllocations, pi);
+
+		std::cout << "Size of each allocation [" << size << " bytes]. Number of allocations [" << numAllocations << "]." << std::endl;
+
+		auto start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < numAllocations; i++) {
+			void* ptr = memMgr.randomAllocate(size);
+		}
+		auto end = std::chrono::high_resolution_clock::now();
+		auto time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		std::cout << "[Single-threaded] Our pool allocation took: \t" << time_span.count() << " nanoseconds." << std::endl;
+
+		start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < numAllocations; i++) {
+			void* ptr = memMgr.singleFrameAllocate(size);
+		}
+		end = std::chrono::high_resolution_clock::now();
+		time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		std::cout << "[Single-threaded] Our stack allocation took: \t" << time_span.count() << " seconds." << std::endl;
+		
+	};
+
+	std::thread t1(testFunc);
+	t1.join();
+
+	MemoryManager& memMgr = MemoryManager::getInstance();
+	std::vector<MemoryManager::PoolInstance> pi;
+
+	memMgr.cleanUp();
+
+	pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, numThreads });
+
+	memMgr.init(size * numAllocations, pi);
+
+
 	
+	auto poolAlloc = [&size, &numAllocations, &numThreads]() {
+
+		auto& memMgr = MemoryManager::getInstance();
+		unsigned int allocations = numAllocations / numThreads;
+		
+		auto start = std::chrono::high_resolution_clock::now();
+
+		for (int i = 0; i < allocations; i++)
+			void* ptr = memMgr.randomAllocate(size);
+
+		auto end = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+	};
+
+	auto stackStart = std::chrono::high_resolution_clock::now() + std::chrono::seconds(4);
+	auto stackAlloc = [&size, &numAllocations, &stackStart, &numThreads]() {
+
+		auto& memMgr = MemoryManager::getInstance();
+		unsigned int allocations = numAllocations / numThreads;
+		auto start = std::chrono::high_resolution_clock::now();
+
+		for (int i = 0; i < allocations; i++)
+			void* ptr = memMgr.singleFrameAllocate(size);
+
+		auto end = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+	};
+
+	std::vector<std::future<std::chrono::duration<double>>> threads(numThreads);
+
+	for (int i = 0; i < numThreads; i++) {
+		threads.at(i) = std::async(std::launch::async, poolAlloc);
+	}
+	std::chrono::duration<double> timeElapsed = std::chrono::duration<double>(0.0);
+	for (int i = 0; i < numThreads; i++) {
+		try {
+			timeElapsed += threads.at(i).get();
+		}
+		catch (std::exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+	}
+	auto end = std::chrono::high_resolution_clock::now();
+	std::cout << "[Multi-threaded] Our pool allocation took: \t" << timeElapsed.count() << " seconds." << std::endl;
 
 
+	for (int i = 0; i < numThreads; i++) {
+		threads.at(i) = std::async(std::launch::async, stackAlloc);
+	}
+	timeElapsed = std::chrono::duration<double>(0.0);
+	for (int i = 0; i < numThreads; i++) {
+		try {
+			timeElapsed += threads.at(i).get();
+		}
+		catch (std::exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+	}
+	std::cout << "[Multi-threaded] Our stack allocation took: \t" << timeElapsed.count() << " seconds." << std::endl;
 
-	// Output
-	/*std::cout << "Capacity: " << byteCapacity << ". EntrySize: " << poolEntryByteSize << std::endl;
-	std::cout << "Memorymanager took: " << differenceOurs.count() << " nanoseconds" << std::endl;
-	std::cout << "New took: " << differenceNew.count() << " nanoseconds" << std::endl;
-	std::cout << "Ours was better by: " << difference.count() << " nanoseconds" << std::endl;
-	std::cout << std::endl << std::endl;*/
 }
 
 void TestCases::testCase11()
 {
+}
+
+void TestCases::poolAllocDealloc()
+{
+	auto testFunc = []() {
+		MemoryManager& memMgr = MemoryManager::getInstance();
+		std::vector<MemoryManager::PoolInstance> pi;
+
+		unsigned int size = 64; // The size of a 4x4 matrix of floats
+		unsigned int numAssignments = ARCH_BYTESIZE * 10;
+		unsigned int maxSizeBytes = size * numAssignments;
+		pi.push_back(MemoryManager::PoolInstance{ size, numAssignments, 4 });
+
+		memMgr.init(ARCH_BYTESIZE, pi);
+
+		srand(time(0));
+		std::vector<void*> pointers;
+		while (true) {
+			try {
+				if (rand() % 10 < 4 || pointers.size() < numAssignments / 2) {
+					pointers.push_back(memMgr.randomAllocate(size));
+					std::cout << "Added element" << std::endl;
+				}
+				else {
+					if (pointers.size() > 0) {
+						unsigned int index = rand() % pointers.size();
+						memMgr.deallocateSingleRandom(pointers[index], size);
+						std::swap(pointers[index], pointers.back());
+						pointers.pop_back();
+						std::cout << "Added element" << std::endl;
+					}
+				}
+
+			}
+			catch (std::exception& e) {
+				
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		}
+
+	};
+	std::thread t1(testFunc);
+
+	auto allocatedSpaceUpdateFunction = []() {
+		GlutManager& glutMngr = GlutManager::getInstance();
+		MemoryManager& memMngr = MemoryManager::getInstance();
+
+		auto allocatedSpace = memMngr.getAllocatedSpace();
+		std::vector<std::vector<bool>> stacks(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+		// Update the vectors of the GUI
+		while (true) {
+			auto allocatedSpace = memMngr.getAllocatedSpace();
+			stacks.at(0) = allocatedSpace.stacks;
+			glutMngr.updateVectors(stacks, allocatedSpace.pools);
+			memMngr.updateAllocatedSpace();
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		}
+	};
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+	std::thread t2(allocatedSpaceUpdateFunction);
+	GlutManager& glutMngr = GlutManager::getInstance();
+	glutMngr.EnterMainLoop();
+
+	t1.join();
+	t2.join();
 }
 
 void TestCases::testCase13() {
