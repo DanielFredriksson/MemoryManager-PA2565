@@ -86,7 +86,7 @@ PoolAllocator::PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int 
 	// Set each quadrant's 'FreeAddress' to its own first entry
 	m_quadFreeAddress.resize(numQuadrants);
 	for (int i = 0; i < m_numQuadrants; i++)
-		m_quadFreeAddress.emplace_back(static_cast<char*>(m_memPtr) + (m_quadrantSize * i));
+		m_quadFreeAddress.at(i) = (static_cast<char*>(m_memPtr) + (m_quadrantSize * i));
 }
 
 PoolAllocator::~PoolAllocator()
@@ -105,6 +105,7 @@ void* PoolAllocator::allocate()
 	m_startQuadrant++;
 	m_startQuadrant %= m_numQuadrants;
 	int currentQuadrant = m_startQuadrant;
+	//int currentQuadrant = 0;
 	// A returnValue of '-1' means the quadrant if completely full
 	int entryReturnNum = -1;
 
@@ -117,8 +118,9 @@ void* PoolAllocator::allocate()
 		// searching in that quadrant already. So we look through the next
 		// quadrant in the hopes that it's not being searched through.
 		// also checks whether or not the quadrant has a free address
+		bool full = false;
 		while (!m_usedQuadrants.at(currentQuadrant).compare_exchange_strong(expected, true)
-				|| m_quadFreeAddress.at(currentQuadrant) == nullptr)
+			|| (full = (m_quadFreeAddress.at(currentQuadrant) == nullptr)))
 		{
 
 			// OPTI -- EATS A LOT OF CPU TIME
@@ -129,7 +131,8 @@ void* PoolAllocator::allocate()
 			
 			// expected == true
 			// at == true
-			m_usedQuadrants.at(currentQuadrant).store(false);
+			if (!full)
+				m_usedQuadrants.at(currentQuadrant).store(false);
 			expected = false;
 
 			currentQuadrant++;
