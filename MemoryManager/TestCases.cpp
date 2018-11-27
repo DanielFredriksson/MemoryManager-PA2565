@@ -24,14 +24,14 @@ void TestCases::anotherTest()
 {
 	auto testFunc = []() {
 		MemoryManager& memMgr = MemoryManager::getInstance();
-		std::vector<MemoryManager::PoolInstance> pi;
+		std::vector<PoolInstance> pi;
 
 		unsigned int size = 2048;
 		unsigned int numAssignments = 8000;
 		std::cout << "Number of allocation (" << numAssignments << ")  Size of each allocation (" << size << ")" << std::endl;
-		pi.push_back(MemoryManager::PoolInstance{ size, numAssignments, 4 });
-		//pi.push_back(MemoryManager::PoolInstance{ 8 * 2, 12, 4 });
-		//pi.push_back(MemoryManager::PoolInstance{ 8 * 3, 12, 4 });
+		pi.push_back(PoolInstance{ size, numAssignments, 4 });
+		//pi.push_back(PoolInstance{ 8 * 2, 12, 4 });
+		//pi.push_back(PoolInstance{ 8 * 3, 12, 4 });
 
 		memMgr.init(1024, pi);
 
@@ -53,10 +53,10 @@ void TestCases::anotherTest()
 
 	auto testFuncMulti = []() {
 		MemoryManager& memMgr = MemoryManager::getInstance();
-		std::vector<MemoryManager::PoolInstance> pi;
+		std::vector<PoolInstance> pi;
 
-		pi.push_back(MemoryManager::PoolInstance{ 24, 8 * 800, 4 });
-		pi.push_back(MemoryManager::PoolInstance{ 16, 8 * 16, 4 });
+		pi.push_back(PoolInstance{ 24, 8 * 800, 4 });
+		pi.push_back(PoolInstance{ 16, 8 * 16, 4 });
 		memMgr.init(1024, pi);
 
 		std::chrono::system_clock::time_point sleepTill = std::chrono::system_clock::now() + std::chrono::seconds(2);
@@ -117,10 +117,10 @@ void TestCases::anotherTest()
 void TestCases::cleanMemoryManager() {
 	memMngr.cleanUp();
 	
-	std::vector<MemoryManager::PoolInstance> pi;
-	pi.push_back(MemoryManager::PoolInstance{ 512, 8000, 4 });
-	pi.push_back(MemoryManager::PoolInstance{ 256, 8000, 4 });
-	pi.push_back(MemoryManager::PoolInstance{ 128, 8000, 4 });
+	std::vector<PoolInstance> pi;
+	pi.push_back(PoolInstance{ 512, 8000, 4 });
+	pi.push_back(PoolInstance{ 256, 8000, 4 });
+	pi.push_back(PoolInstance{ 128, 8000, 4 });
 	memMngr.init(1024, pi);
 }
 
@@ -135,8 +135,8 @@ void TestCases::testCase2()
 	unsigned int poolEntryByteSize = 8;
 	unsigned int numEntries = byteCapacity / poolEntryByteSize;
 	unsigned int numQuadrants = 4;
-	std::vector<MemoryManager::PoolInstance> pools;
-	MemoryManager::PoolInstance pool = {
+	std::vector<PoolInstance> pools;
+	PoolInstance pool = {
 		poolEntryByteSize,
 		numEntries,
 		numQuadrants
@@ -185,8 +185,8 @@ void TestCases::testCase8()
 	unsigned int poolEntryByteSize = 8;
 	unsigned int numEntries = byteCapacity / poolEntryByteSize;
 	unsigned int numQuadrants = 1;
-	std::vector<MemoryManager::PoolInstance> pools;
-	MemoryManager::PoolInstance pool = {
+	std::vector<PoolInstance> pools;
+	PoolInstance pool = {
 		poolEntryByteSize,
 		numEntries,
 		numQuadrants
@@ -249,8 +249,8 @@ void TestCases::testCase9()
 	unsigned int poolEntryByteSize = 8;
 	unsigned int numEntries = byteCapacity / poolEntryByteSize;
 	unsigned int numQuadrants = 4;
-	std::vector<MemoryManager::PoolInstance> pools;
-	MemoryManager::PoolInstance pool = {
+	std::vector<PoolInstance> pools;
+	PoolInstance pool = {
 		poolEntryByteSize,
 		numEntries,
 		numQuadrants
@@ -353,8 +353,8 @@ void TestCases::compareEfficiencySingleThreaded(int capacityExponent, int entryS
 	unsigned int poolEntryByteSize = pow(2, entrySizeExponent);
 	unsigned int numEntries = byteCapacity / poolEntryByteSize;
 	unsigned int numQuadrants = 4;
-	std::vector<MemoryManager::PoolInstance> pools;
-	MemoryManager::PoolInstance pool = {
+	std::vector<PoolInstance> pools;
+	PoolInstance pool = {
 		poolEntryByteSize,
 		numEntries,
 		numQuadrants
@@ -407,13 +407,13 @@ void TestCases::testCase4(unsigned int sizePerAlloc, unsigned int numAllocs, uns
 	averages[2] = 0;
  	auto testFunc = [&sizePerAlloc, &numAllocs, &averages]() {
 		MemoryManager& memMgr = MemoryManager::getInstance();
-		std::vector<MemoryManager::PoolInstance> pi;
+		std::vector<PoolInstance> pi;
 
 		memMgr.cleanUp();
 
 		unsigned int size = sizePerAlloc;
 		unsigned int numAllocations = numAllocs;
-		pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, 4 });
+		pi.push_back(PoolInstance{ size, numAllocations, 4 });
 
 		memMgr.init(size * numAllocations, pi);
 
@@ -467,11 +467,11 @@ void TestCases::testCase10()
 	unsigned int numThreads = 4U;
 	auto testFunc = [&size, &numAllocations, &numThreads]() {
 		MemoryManager& memMgr = MemoryManager::getInstance();
-		std::vector<MemoryManager::PoolInstance> pi;
+		std::vector<PoolInstance> pi;
 
 		memMgr.cleanUp();
 
-		pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, numThreads });
+		pi.push_back(PoolInstance{ size, numAllocations, numThreads });
 
 		memMgr.init(size * numAllocations, pi);
 
@@ -499,11 +499,11 @@ void TestCases::testCase10()
 	t1.join();
 
 	MemoryManager& memMgr = MemoryManager::getInstance();
-	std::vector<MemoryManager::PoolInstance> pi;
+	std::vector<PoolInstance> pi;
 
 	memMgr.cleanUp();
 
-	pi.push_back(MemoryManager::PoolInstance{ size, numAllocations, numThreads });
+	pi.push_back(PoolInstance{ size, numAllocations, numThreads });
 
 	memMgr.init(size * numAllocations, pi);
 
@@ -578,12 +578,12 @@ void TestCases::testCase11()
 void TestCases::poolAllocDealloc()
 {
 	MemoryManager& memMgr = MemoryManager::getInstance();
-	std::vector<MemoryManager::PoolInstance> pi;
+	std::vector<PoolInstance> pi;
 
 	unsigned int size = 64; // The size of a 4x4 matrix of floats
 	unsigned int numAssignments = ARCH_BYTESIZE * 50;
 	unsigned int maxSizeBytes = size * numAssignments;
-	pi.push_back(MemoryManager::PoolInstance{ size, numAssignments, 4 });
+	pi.push_back(PoolInstance{ size, numAssignments, 4 });
 
 	memMgr.init(ARCH_BYTESIZE, pi);
 

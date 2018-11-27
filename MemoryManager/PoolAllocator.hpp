@@ -11,8 +11,6 @@
 
 class PoolAllocator: private Allocator 
 {
-
-	
 private: /// VARIABLES
 	int findFreeEntry(int quadrant);
 	bool checkIfAllQuadrantsSafe(std::vector<bool> quadrantSafe);
@@ -35,10 +33,9 @@ private: /// FUNCTIONS
 	// Holds each NEXT FREE ADDRESS for each quadrant
 	std::vector<void*> m_quadFreeAddress;
 
-public:
-	typedef unsigned int ID;
+public: /// VARIABLES
 
-public:
+public: /// FUNCTIONS
 	PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int numEntries, unsigned int numQuadrants);
 	virtual ~PoolAllocator();
 

@@ -2,33 +2,13 @@
 
 #include <string>
 
+/*+-+-+-+-+-+-+-+-+-+-+-+
+	PRIVATE FUNCTIONS
++-+-+-+-+-+-+-+-+-+-+-+*/
+
 void* MemoryManager::getMem(unsigned int sizeBytes)
 {
 	return calloc(1, sizeBytes);
-}
-
-MemoryManager::MemoryManager()
-{
-	m_stack = nullptr;
-}
-MemoryManager::~MemoryManager()
-{
-	cleanUp();
-}
-
-void MemoryManager::init(unsigned int stackSizeBytes, std::vector<PoolInstance> poolInstances)
-{
-	addStack(stackSizeBytes);
-	m_currMemUsage.stacks = m_stack->getUsedMemory();
-
-	int currIndex = 0;
-	for (PoolInstance PI : poolInstances) {
-		if (PI.numEntries % PI.numQuadrants != 0)
-			throw std::exception(("The number of entries in PoolInstance " + std::to_string(currIndex) + " was not divisible with the number of quadrants.").c_str());
-
-		addPool(PI.sizeBytesEachEntry, PI.numEntries, PI.numQuadrants);
-		m_currMemUsage.pools.push_back(m_pools.at(currIndex++)->getUsedMemory());
-	}
 }
 
 void MemoryManager::addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries, unsigned int numQuadrants)
@@ -61,6 +41,40 @@ void MemoryManager::addStack(unsigned int sizeBytes)
 		throw std::exception("MemoryManager::addStack : Stack already created");
 
 
+}
+
+
+
+
+
+/*+-+-+-+-+-+-+-+-+-+-+-+
+	 PUBLIC FUNCTIONS
++-+-+-+-+-+-+-+-+-+-+-+*/
+
+MemoryManager::MemoryManager()
+{
+	m_stack = nullptr;
+}
+MemoryManager::~MemoryManager()
+{
+	cleanUp();
+}
+
+void MemoryManager::init(unsigned int stackSizeBytes, std::vector<PoolInstance> poolInstances)
+{
+	// Currently we only have one stack (single-frame stack)
+	addStack(stackSizeBytes);
+	m_currMemUsage.stacks = m_stack->getUsedMemory();
+
+	int currIndex = 0;
+	// Initializing each 'PoolInstance' into an actual pool in the memory manager
+	for (PoolInstance PI : poolInstances) {
+		if (PI.numEntries % PI.numQuadrants != 0)
+			throw std::exception(("The number of entries in PoolInstance " + std::to_string(currIndex) + " was not divisible with the number of quadrants.").c_str());
+		// Inserting the pool into the 'm_pools' vector
+		addPool(PI.sizeBytesEachEntry, PI.numEntries, PI.numQuadrants);
+		m_currMemUsage.pools.push_back(m_pools.at(currIndex++)->getUsedMemory());
+	}
 }
 
 void* MemoryManager::singleFrameAllocate(unsigned int sizeBytes) {
@@ -110,7 +124,7 @@ void MemoryManager::updateAllocatedSpace()
 	}
 }
 
-MemoryManager::MemoryUsage& MemoryManager::getAllocatedSpace()
+MemoryUsage& MemoryManager::getAllocatedSpace()
 {
 	return m_currMemUsage;
 }

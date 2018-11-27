@@ -1,8 +1,9 @@
 #include "Defines.h"
 #include "PoolAllocator.hpp"
-/*
-	Private Functions
-*/
+
+/*+-+-+-+-+-+-+-+-+-+-+-+
+	PRIVATE FUNCTIONS
++-+-+-+-+-+-+-+-+-+-+-+*/
 
 int PoolAllocator::findFreeEntry(int quadrant)
 {
@@ -48,9 +49,13 @@ bool PoolAllocator::checkIfAllQuadrantsSafe(std::vector<bool> quadrantSafe)
 	return true;
 }
 
-/*
-	Public Functions
-*/
+
+
+
+
+/*+-+-+-+-+-+-+-+-+-+-+-+
+	 PUBLIC FUNCTIONS
++-+-+-+-+-+-+-+-+-+-+-+*/
 
 PoolAllocator::PoolAllocator(void* memPtr, unsigned int entrySize, unsigned int numEntries, unsigned int numQuadrants) 
 	: Allocator(memPtr, entrySize * numEntries)
@@ -124,7 +129,7 @@ void* PoolAllocator::allocate()
 			
 			// expected == true
 			// at == true
-			m_usedQuadrants.at(currentQuadrant) = false;
+			m_usedQuadrants.at(currentQuadrant).store(false);
 			expected = false;
 
 			currentQuadrant++;
@@ -133,7 +138,7 @@ void* PoolAllocator::allocate()
 
 		entryReturnNum = findFreeEntry(currentQuadrant);
 		// Set the quadrant's 'm_usedMtxs' back to false for other threads
-		m_usedQuadrants[currentQuadrant] = false;
+		m_usedQuadrants[currentQuadrant].store(false);
 	}
 	// Calculating which address we have allocated, casting it to a void*
 	char* returnAddress = static_cast<char*>(m_memPtr);
@@ -155,7 +160,7 @@ void PoolAllocator::deallocateAll()
 		for (int i = 0; i < m_usedQuadrants.size(); i++)
 			if (m_usedQuadrants.at(i) == false)
 			{	// Set to 'used'
-				m_usedQuadrants.at(i) = true;
+				m_usedQuadrants.at(i).store(true);
 				// Set to 'safe'
 				quadrantSafe.at(i) = true;
 			}
@@ -196,7 +201,7 @@ void PoolAllocator::deallocateSingle(void* address)
 	// Set the specific quadrant's (that we just deallocated from) newest free
 	// entry to the address we just deallocated.
 	m_quadFreeAddress.at(currentQuadrant) = address;
-	m_usedQuadrants.at(currentQuadrant) = false;
+	m_usedQuadrants.at(currentQuadrant).store(false);
 }
 
 std::vector<bool> PoolAllocator::getUsedMemory()

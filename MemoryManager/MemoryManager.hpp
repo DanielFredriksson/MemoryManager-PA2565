@@ -7,47 +7,49 @@
 #include "StackAllocator.hpp"
 #include <thread>
 
+// DEFINITIONS
+// --------------------------------------
+struct MemoryUsage { // All vectors of bools are visually depicted by GLUT
+	std::vector<bool> stacks;
+	std::vector<std::vector<bool>> pools;
+};
+
+struct PoolInstance {
+	unsigned int sizeBytesEachEntry;
+	unsigned int numEntries;
+	unsigned int numQuadrants;
+};
+// ---------------------------------------
+
 class MemoryManager
 {
-public:
-	struct MemoryUsage {
-		std::vector<bool> stacks;
-		std::vector<std::vector<bool>> pools;
-	};
-
-	struct PoolInstance {
-		unsigned int sizeBytesEachEntry;
-		unsigned int numEntries;
-		unsigned int numQuadrants;
-	};
-
-private:
+private: /// VARIABLES
 	std::vector<PoolAllocator*> m_pools;
 	StackAllocator* m_stack;
 
 	MemoryUsage m_currMemUsage;
 
-private:
+private: /// FUNCTIONS
 	void* getMem(unsigned int sizeBytes);
 
 	// Singleton class shouldn't be able to be copied
 	MemoryManager(MemoryManager const&) = delete;
 	void operator=(MemoryManager const&) = delete;
 
-private:
 	void addPool(unsigned int sizeBytesEachEntry, unsigned int numEntries, unsigned int numQuadrants);
 	void addStack(unsigned int sizeBytes);
 
-public:
-	MemoryManager();
-	~MemoryManager();
+public: /// FUNCTIONS
 
-	static MemoryManager& getInstance() 
+	static MemoryManager& getInstance()
 	{
 		static MemoryManager instance;
 
 		return instance;
 	}
+
+	MemoryManager();
+	~MemoryManager();
 
 	void init(unsigned int stackSizeBytes, std::vector<PoolInstance> poolInstances);
 

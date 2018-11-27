@@ -6,21 +6,22 @@
 #include <shared_mutex>
 #include <iostream>
 
+// DEFINITIONS
+// -------------------------
 typedef unsigned int Marker;
+// -------------------------
+
 class StackAllocator : private Allocator 
 {
-private:
+private: /// VARIABLES
 	std::atomic<Marker> m_marker;
 	std::shared_mutex m_mtx;
 
-
-private:
+private: /// FUNCTIONS
+	unsigned int padMemory(unsigned int sizeBytes);
 	void cleanUp();
 
-	unsigned int padMemory(unsigned int sizeBytes);
-
-
-public:
+public: /// FUNCTIONS
 	StackAllocator(void* memPtr, unsigned int sizeBytes);
 	virtual ~StackAllocator();
 
@@ -30,10 +31,8 @@ public:
 	Marker getMarker();
 	void clearToMarker(Marker marker);
 
-	// Memory tracking for debugging purposes
+	// Memory tracking for GLUT (Drawing our stack)
 	virtual std::vector<bool> getUsedMemory();
-
-
 };
 
 #endif //STACK_ALLOCATOR
