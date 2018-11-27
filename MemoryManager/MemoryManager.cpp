@@ -64,6 +64,7 @@ void MemoryManager::init(unsigned int stackSizeBytes, std::vector<PoolInstance> 
 {
 	// Currently we only have one stack (single-frame stack)
 	addStack(stackSizeBytes);
+	// Creating 'vector<bool>' for memory tacking purposes
 	m_currMemUsage.stacks = m_stack->getUsedMemory();
 
 	int currIndex = 0;
@@ -73,6 +74,7 @@ void MemoryManager::init(unsigned int stackSizeBytes, std::vector<PoolInstance> 
 			throw std::exception(("The number of entries in PoolInstance " + std::to_string(currIndex) + " was not divisible with the number of quadrants.").c_str());
 		// Inserting the pool into the 'm_pools' vector
 		addPool(PI.sizeBytesEachEntry, PI.numEntries, PI.numQuadrants);
+		// Creating 'vector<bool>' for memory tacking purposes
 		m_currMemUsage.pools.push_back(m_pools.at(currIndex++)->getUsedMemory());
 	}
 }
@@ -81,45 +83,47 @@ void* MemoryManager::singleFrameAllocate(unsigned int sizeBytes) {
 	return m_stack->allocate(sizeBytes);
 }
 
-void* MemoryManager::randomAllocate(unsigned int sizeBytes) {
-	void* ptr = nullptr;
-	// Check for an appropriate sized pool
+void* MemoryManager::poolAllocate(unsigned int sizeBytes) {
+	void* ptrToAllocation = nullptr;
+	// Check for an appropriate sized pool; if it already exists
 	for (auto it = m_pools.begin(); it != m_pools.end(); ++it) {
 		if (sizeBytes <= (*it)->getEntrySize()) {
-			ptr = (*it)->allocate();
+			ptrToAllocation = (*it)->allocate();
 			break;
 		}
 	}
-	/*for (unsigned int i = 0; i < m_pools.size(); i++) {
-		if (sizeBytes <= m_pools.at(i)->getEntrySize()) {
-			ptr = m_pools.at(i)->allocate();
-			i = m_pools.size();
-		}
-	}*/
-	if (ptr == nullptr)
-		throw std::exception("MemoryManager::randomAllocate : No pool allocated for size " + sizeBytes);
 
-	return ptr;
+	if (ptrToAllocation == nullptr)
+		throw std::exception("MemoryManager::poolAllocate : No pool allocated for size " + sizeBytes);
+
+	return ptrToAllocation;
 }
 
-void MemoryManager::deallocateSingleRandom(void* ptr, unsigned int sizeOfAlloc)
+void MemoryManager::deallocateSinglePool(void* ptr, unsigned int sizeOfAlloc)
 {
+	// We look for which pool the object exists in (ordered: smallest pool -> biggest pool)
 	for (unsigned int i = 0; i < m_pools.size(); i++)
 		if (sizeOfAlloc <= m_pools.at(i)->getEntrySize())
-			m_pools.at(i)->deallocateSingle(ptr);
+			m_pools.at(i)->deallocateSingle(ptr); // We then deallocate it
 }
 
-void MemoryManager::deallocateAllRandom()
+void MemoryManager::deallocateAllPools()
 {
 	for (unsigned int i = 0; i < m_pools.size(); i++)
 		m_pools.at(i)->deallocateAll();
 }
 
+void MemoryManager::deallocateSingleFrameStack() {
+	m_stack->deallocateAll();
+}
+
 void MemoryManager::updateAllocatedSpace()
 {
+	// Updates the 'vector<bool>' for the SF-stack for GLUT (used to visualize memory consumption)
 	m_currMemUsage.stacks = m_stack->getUsedMemory();
 
 	for (unsigned int i = 0; i < m_pools.size(); i++) {
+		// Updates the multiple 'vector<bool>' for GLUT (used to visualize memory consumption)
 		m_currMemUsage.pools.at(i) = m_pools.at(i)->getUsedMemory();
 	}
 }
@@ -127,10 +131,6 @@ void MemoryManager::updateAllocatedSpace()
 MemoryUsage& MemoryManager::getAllocatedSpace()
 {
 	return m_currMemUsage;
-}
-
-void MemoryManager::deallocateStack() {
-	m_stack->deallocateAll();
 }
 
 void MemoryManager::cleanUp()
