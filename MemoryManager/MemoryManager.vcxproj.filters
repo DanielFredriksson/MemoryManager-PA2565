@@ -21,15 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MemoryManager.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StackAllocator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PoolAllocator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Allocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,13 +30,22 @@
     <ClInclude Include="TestCases.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GlutIncludes.hpp">
+    <ClInclude Include="StackAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PoolAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderFunctions.h">
       <Filter>Header Files\Glut %28hpp%29</Filter>
     </ClInclude>
-    <ClInclude Include="GlutManager.hpp">
+    <ClInclude Include="GlutManager.h">
       <Filter>Header Files\Glut %28hpp%29</Filter>
     </ClInclude>
-    <ClInclude Include="RenderFunctions.hpp">
+    <ClInclude Include="GlutIncludes.h">
       <Filter>Header Files\Glut %28hpp%29</Filter>
     </ClInclude>
   </ItemGroup>

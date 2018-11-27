@@ -160,13 +160,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Allocator.h" />
-    <ClInclude Include="GlutIncludes.hpp" />
-    <ClInclude Include="GlutManager.hpp" />
+    <ClInclude Include="GlutIncludes.h" />
+    <ClInclude Include="GlutManager.h" />
     <ClInclude Include="Defines.h" />
-    <ClInclude Include="MemoryManager.hpp" />
-    <ClInclude Include="PoolAllocator.hpp" />
-    <ClInclude Include="RenderFunctions.hpp" />
-    <ClInclude Include="StackAllocator.hpp" />
+    <ClInclude Include="MemoryManager.h" />
+    <ClInclude Include="PoolAllocator.h" />
+    <ClInclude Include="RenderFunctions.h" />
+    <ClInclude Include="StackAllocator.h" />
     <ClInclude Include="TestCases.h" />
   </ItemGroup>
   <ItemGroup>

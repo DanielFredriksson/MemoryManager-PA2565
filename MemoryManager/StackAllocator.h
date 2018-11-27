@@ -1,10 +1,9 @@
 #ifndef STACK_ALLOCATOR
 #define STACK_ALLOCATOR
 
-#include "Allocator.h"
 #include <atomic>
-#include <shared_mutex>
-#include <iostream>
+
+#include "Allocator.h"
 
 // DEFINITIONS
 // -------------------------
@@ -15,7 +14,6 @@ class StackAllocator : private Allocator
 {
 private: /// VARIABLES
 	std::atomic<Marker> m_marker;
-	std::shared_mutex m_mtx;
 
 private: /// FUNCTIONS
 	unsigned int padMemory(unsigned int sizeBytes);
@@ -31,7 +29,7 @@ public: /// FUNCTIONS
 	Marker getMarker();
 	void clearToMarker(Marker marker);
 
-	// Memory tracking for GLUT (Drawing our stack)
+	// Memory tracking for our GLUT-Manager (Drawing our stack)
 	virtual std::vector<bool> getUsedMemory();
 };
 

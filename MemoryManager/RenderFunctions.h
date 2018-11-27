@@ -1,5 +1,5 @@
 #pragma once
-#include "GlutIncludes.hpp"
+#include "GlutIncludes.h"
 
 void renderSquare(double size, double startX, double startY);
 void renderRectangle(double sizeX, double sizeY, double startX, double startY);

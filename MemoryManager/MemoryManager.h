@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "PoolAllocator.hpp"
-#include "StackAllocator.hpp"
+#include "PoolAllocator.h"
+#include "StackAllocator.h"
 #include <thread>
 
 // DEFINITIONS

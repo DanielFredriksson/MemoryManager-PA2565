@@ -1,4 +1,4 @@
-#include "RenderFunctions.hpp"
+#include "RenderFunctions.h"
 
 #define BARSIZE_X 1.5f
 #define BARSIZE_Y 0.2f
@@ -62,7 +62,7 @@ void renderBar(double startX, double startY, std::vector<bool> entries, GLfloat 
 	renderRectangle(BARSIZE_X, BARSIZE_Y, startX, startY);
 
 	// Render squares in terms of entries
-	for (int x = 0; x < entries.size(); x++) {
+	for (unsigned int x = 0; x < entries.size(); x++) {
 		if (entries.at(x) == true) {			// If an entry exists,
 			glColor3f(entryColor[0], entryColor[1], entryColor[2]);	// Set chosen entry-color
 			renderRectangle(										// Render it
@@ -84,7 +84,7 @@ void renderBar(double startX, double startY, std::vector<bool> entries, GLfloat 
 
 void renderVector(std::vector<std::vector<bool>> vector, GLfloat entryColor[3], int* barCount)
 {
-	for (int i = 0; i < vector.size(); i++) {
+	for (unsigned int i = 0; i < vector.size(); i++) {
 		double startX = ((-1) + OUTER_PADDING);												// Starts from the left side of the window
 		double startY = 1 - (OUTER_PADDING + (BARSIZE_Y + INNER_PADDING) * ((*barCount) + 1));	// Starts from the top of the window
 		renderBar(startX, startY, vector.at((i)), entryColor);

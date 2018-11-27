@@ -1,8 +1,8 @@
-#include "GlutManager.hpp"
-#include "GlutIncludes.hpp"
-#include "RenderFunctions.hpp"
 #include <iostream>
-#include "RenderFunctions.hpp"
+
+#include "GlutManager.h"
+#include "GlutIncludes.h"
+#include "RenderFunctions.h"
 
 GlutManager& asdf = GlutManager::getInstance();
 GlutManager* ptr = &asdf;
@@ -72,11 +72,11 @@ void GlutManager::updateVectors(std::vector<std::vector<bool>>& stacks, std::vec
 	// Convert pointerd vector to non-pointered so if threads run out
 	// the vectors won't be affected.
 	std::vector<std::vector<bool>> newStacks;
-	for (int i = 0; i < stacks.size(); i++) {
+	for (unsigned int i = 0; i < stacks.size(); i++) {
 		newStacks.push_back(stacks.at(i));
 	}
 	std::vector<std::vector<bool>> newPools;
-	for (int i = 0; i < pools.size(); i++) {
+	for (unsigned int i = 0; i < pools.size(); i++) {
 		newPools.push_back(pools.at(i));
 	}
 	m_stacks = newStacks;
