@@ -23,6 +23,8 @@ void TestCases::timingTest(unsigned int sizePerAlloc, unsigned int numAllocs, un
 	averages[0] = 0;
 	averages[1] = 0;
 	averages[2] = 0;
+	MemoryManager& memMgr = MemoryManager::getInstance();
+	memMgr.cleanUp();
 
  	auto testFunc = [&sizePerAlloc, &numAllocs, &averages]() {
 		MemoryManager& memMgr = MemoryManager::getInstance();

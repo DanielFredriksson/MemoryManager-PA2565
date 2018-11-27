@@ -146,4 +146,7 @@ void MemoryManager::cleanUp()
 
 	delete m_stack;
 	m_stack = nullptr;
+
+	m_currMemUsage.pools.clear();
+	m_currMemUsage.stacks.clear();
 }
