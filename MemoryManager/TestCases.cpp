@@ -37,7 +37,7 @@ void TestCases::anotherTest()
 
 		auto start = std::chrono::system_clock::now();
 		for (int i = 0; i < numAssignments; i++) {
-			void* ptr = memMgr.randomAllocate(size);
+			void* ptr = memMgr.poolAllocate(size);
 		}
 		auto end = std::chrono::system_clock::now();
 		std::cout << "Ours took: \n" << (end - start).count() << std::endl;
@@ -63,9 +63,9 @@ void TestCases::anotherTest()
 		
 		auto func = [&memMgr, &sleepTill]() {
 			std::this_thread::sleep_until(sleepTill);
-			auto ptr = memMgr.randomAllocate(5);
+			auto ptr = memMgr.poolAllocate(5);
 			for (int i = 0; i < 2; i++)
-				auto ptr = memMgr.randomAllocate(9);
+				auto ptr = memMgr.poolAllocate(9);
 		};
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -163,7 +163,7 @@ void TestCases::testCase2()
 	try {
 		std::cout << "Attempting to overflow the pool..." << std::endl;
 		while (true) {
-			this->memMngr.randomAllocate(8);
+			this->memMngr.poolAllocate(8);
 		}
 	}
 	catch (std::exception &e) {
@@ -198,7 +198,7 @@ void TestCases::testCase8()
 	/// Allocate
 	std::cout << "Allocating memory..." << std::endl;
 	MemoryManager& instance = MemoryManager::getInstance();
-	void* adressPointer = instance.randomAllocate(8);
+	void* adressPointer = instance.poolAllocate(8);
 	std::cout << "Memory has been allocated." << std::endl << std::endl;
 
 	/// Functions
@@ -207,7 +207,7 @@ void TestCases::testCase8()
 	auto allocateFunction = [&sleepTill]() {
 		try {
 			MemoryManager& instance = MemoryManager::getInstance();
-			return instance.randomAllocate(8);
+			return instance.poolAllocate(8);
 		} 
 		catch (std::exception &e) {
 			std::cout << "Error caught! [ " << e.what() << std::endl << std::endl;
@@ -217,7 +217,7 @@ void TestCases::testCase8()
 	auto deallocateFunction = [&sleepTill, &adressPointer]() {
 		try {
 			MemoryManager& instance = MemoryManager::getInstance();
-			instance.deallocateSingleRandom(adressPointer, 8);
+			instance.deallocateSinglePool(adressPointer, 8);
 		}
 		catch (std::exception &e) {
 			std::cout << "Error caught! [ " << e.what() << std::endl << std::endl;
@@ -281,7 +281,7 @@ void TestCases::testCase9()
 		try {
 			std::cout << "Attempting to overflow the pool..." << std::endl;
 			while (true) {
-				MemoryManager::getInstance().randomAllocate(8);
+				MemoryManager::getInstance().poolAllocate(8);
 			}
 		}
 		catch (std::exception &e) {
@@ -307,7 +307,7 @@ void TestCases::testCase1() {
 	void *ptr2 = nullptr;
 
 	for (unsigned int i = 0; i < 2000; i++) {
-		ptr1 = memMngr.randomAllocate(100);
+		ptr1 = memMngr.poolAllocate(100);
 		if (ptr2 == ptr1) {
 			std::cout << "Pool Allocation failed! Allocating to same memory!\n";
 			failed = true;
@@ -370,7 +370,7 @@ void TestCases::compareEfficiencySingleThreaded(int capacityExponent, int entryS
 	// Fill the stack and pool with doubles
 	for (int i = 0; i < numEntries; i++) {
 		double * adress = (double*)memMngr.singleFrameAllocate(poolEntryByteSize);
-		adress = (double*)memMngr.randomAllocate(poolEntryByteSize);
+		adress = (double*)memMngr.poolAllocate(poolEntryByteSize);
 	}
 	auto endOurs = high_resolution_clock::now();
 	auto differenceOurs = duration_cast<std::chrono::nanoseconds>(endOurs - startOurs);
@@ -420,7 +420,7 @@ void TestCases::testCase4(unsigned int sizePerAlloc, unsigned int numAllocs, uns
 		// Pool allocation
 		auto start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < numAllocations; i++) {
-			void* ptr = memMgr.randomAllocate(size);
+			void* ptr = memMgr.poolAllocate(size);
 		}
 		auto end = std::chrono::high_resolution_clock::now();
 		auto timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
@@ -479,7 +479,7 @@ void TestCases::testCase10()
 
 		auto start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < numAllocations; i++) {
-			void* ptr = memMgr.randomAllocate(size);
+			void* ptr = memMgr.poolAllocate(size);
 		}
 		auto end = std::chrono::high_resolution_clock::now();
 		auto time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
@@ -517,7 +517,7 @@ void TestCases::testCase10()
 		auto start = std::chrono::high_resolution_clock::now();
 
 		for (int i = 0; i < allocations; i++)
-			void* ptr = memMgr.randomAllocate(size);
+			void* ptr = memMgr.poolAllocate(size);
 
 		auto end = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
@@ -595,12 +595,12 @@ void TestCases::poolAllocDealloc()
 		while (true) {
 			try {
 				if (rand() % 10 < 4 || pointers.size() < numAssignments / 8) {
-					pointers.push_back(memMgr.randomAllocate(size));
+					pointers.push_back(memMgr.poolAllocate(size));
 				}
 				else {
 					if (pointers.size() > 0) {
 						unsigned int index = rand() % pointers.size();
-						memMgr.deallocateSingleRandom(pointers[index], size);
+						memMgr.deallocateSinglePool(pointers[index], size);
 						std::swap(pointers[index], pointers.back());
 						pointers.pop_back();
 					}
@@ -696,7 +696,7 @@ void TestCases::testCase13() {
 
 			i++;
 			std::cout << "Clearing stack...\n\n";
-			memMngr.deallocateStack();
+			memMngr.deallocateSingleFrameStack();
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			
 

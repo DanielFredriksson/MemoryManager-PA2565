@@ -54,11 +54,11 @@ public: /// FUNCTIONS
 	void init(unsigned int stackSizeBytes, std::vector<PoolInstance> poolInstances);
 
 	void* singleFrameAllocate(unsigned int sizeBytes);
-	void* randomAllocate(unsigned int sizeBytes);
+	void* poolAllocate(unsigned int sizeBytes);
 
-	void deallocateSingleRandom(void* ptr, unsigned int sizeOfAlloc);
-	void deallocateAllRandom();
-	void deallocateStack();
+	void deallocateSinglePool(void* ptr, unsigned int sizeOfAlloc);
+	void deallocateAllPools();
+	void deallocateSingleFrameStack();
 
 	void updateAllocatedSpace();
 	MemoryUsage& getAllocatedSpace();
